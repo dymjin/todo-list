@@ -1,28 +1,33 @@
-
 function makeContainer(name, type, parent) {
-    const container = document.createElement(`${type}`);
-    container.className = `${name.replaceAll('_', "-")}`;
+    const container = document.createElement(type);
+    container.className = name;
     parent.appendChild(container);
+    return container;
 }
 
 function initPageContainers() {
-    makeContainer('project_container', 'div', document.querySelector('.page-container'));
-    makeContainer('todo-title', 'div', document.querySelector('.project-container'));
-    makeContainer('todo-desc', 'div', document.querySelector('.project-container'));
+    makeContainer('project-container', 'div', document.querySelector('.page-container'));
+    makeContainer('todo-container', 'div', document.querySelector('.project-container'));
 }
 
-function makeInput(/*value,*/ type, parent, placeholder) {
+function makeNewProject(projectTitle) {
+    initPageContainers(projectTitle);
+    makeTodo();
+    const btn = makeContainer('add-todo', 'button', document.querySelector('.project-container'));
+    btn.textContent = '+';
+    btn.addEventListener('click', () => makeTodo());
+}
+
+function makeInput(type, parent, placeholder) {
     const input = document.createElement('input');
     input.setAttribute('type', type);
-    // value === undefined ? 0 : input.setAttribute('value', value);
-    input.setAttribute('placeholder', placeholder)
+    input.setAttribute('placeholder', placeholder);
     parent.appendChild(input);
 }
 
-function makeNewProject(title, desc) {
-    initPageContainers();
-    makeInput('text', document.querySelector('.todo-title'), 'title');
-    makeInput('text', document.querySelector('.todo-desc'), 'desc');
+function makeTodo() {
+    makeInput('text', document.querySelector('.todo-container'), 'title');
+    makeInput('text', document.querySelector('.todo-container'), 'desc');
 }
 
-export { makeNewProject };
+export { makeNewProject, makeTodo };

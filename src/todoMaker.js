@@ -1,6 +1,6 @@
 import * as DOMhandler from './DOMhandler.js';
 
 function todoMaker() {
-    DOMhandler.makeNewProject();
+    DOMhandler.makeNewProject('Project');
 }
 export { todoMaker };

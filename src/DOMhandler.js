@@ -1,9 +1,14 @@
+import styles from './style.css';
+
 const init = (() => {
     let i = 1;
     const add = () => { i++; };
     const get = () => { return i };
-    return { add, get };
+    const addBtn = () => { addElement('add-project', 'new project', document.querySelector('.page-container'), 'button'); };
+    return { add, get, addBtn };
 })();
+
+init.addBtn();
 
 function addElement(name, text, parent, type, data = false) {
     type = type || 'div';
@@ -27,6 +32,12 @@ function addInput(name, text, parent, placeholder, disabled, type) {
     return input;
 }
 
+function clearProject() {
+    const pageContainer = document.querySelector('.page-container');
+    pageContainer.removeChild(document.querySelector('.project-container'));
+    pageContainer.removeChild(document.querySelector('.add-todo'));
+}
+
 function addTodoDOM(title, desc, dueDate, priority) {
     title = title || '';
     desc = desc || '';
@@ -47,9 +58,7 @@ function addTodoDOM(title, desc, dueDate, priority) {
         options.forEach(item => {
             if (priority === item.textContent) item.setAttribute('selected', '');
         })
-
     }
-
     init.add();
 }
 
@@ -68,13 +77,12 @@ function addModal() {
     addElement('todo-confirm', '+', dialogForm, 'button', false);
 }
 
-function addProjectDOM(title) {
-    title = title || '';
+function addProjectDOM() {
     addElement('project-container', '', document.querySelector('.page-container'), '', false);
     addModal();
-    addInput('project-title', title, document.querySelector('.project-container'), 'Title', false);
+    addInput('project-title', '', document.querySelector('.project-container'), 'Project Title', false);
     addElement('add-todo', '+', document.querySelector('.page-container'), 'button', false);
 }
 addProjectDOM();
 
-export { addProjectDOM, addTodoDOM };
+export { addProjectDOM, addTodoDOM, clearProject, init };

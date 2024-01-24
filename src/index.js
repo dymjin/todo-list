@@ -13,12 +13,35 @@ document.querySelector('.add-project').addEventListener('click', () => {
     projectCreation.projectList.push(currentProject);
 });
 
-// const btn = document.createElement('button');
-// btn.textContent = 'i';
-// btn.addEventListener('click', () => {
-//     console.log(projectCreation.projectList)
-// });
-// document.body.appendChild(btn);
+const btn = document.createElement('button');
+btn.textContent = 'write';
+btn.addEventListener('click', () => {
+    DOMhandler.clearProject();
+    DOMhandler.addProjectDOM();
+});
+document.body.appendChild(btn);
+
+let copy;
+function clearProjectObj() {
+    while (projectCreation.projectList.length > 0) {
+        projectCreation.projectList.pop();
+    }
+}
+
+const restoreBtn = document.createElement('button');
+restoreBtn.textContent = 'read';
+restoreBtn.addEventListener('click', () => {
+    copy = projectCreation.projectList;
+    const restoredProject = projectCreation.addProject(copy[0].title, copy[0].todoList);
+    clearProjectObj();
+    DOMhandler.clearProject();
+    DOMhandler.addProjectDOM(restoredProject.title);
+    restoredProject.todoList.forEach(item => {
+        DOMhandler.addTodoDOM(item.title, item.desc, item.dueDate, item.priority);
+    })
+    console.log(restoredProject)
+})
+document.body.appendChild(restoreBtn);
 
 function addListeners() {
     document.querySelector('.add-todo').addEventListener('click', () => {
@@ -38,7 +61,7 @@ function addListeners() {
         document.querySelector('.todo-input-title').value = '';
         document.querySelector('.todo-input-desc').value = '';
         document.querySelector('.due-date').value = '';
-        document.querySelector('.priority-select').value = 'Set priority';
+        document.querySelector('.priority-select').value = '';
         document.querySelector('.todo-dialog').close();
     });
 

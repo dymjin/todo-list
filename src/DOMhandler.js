@@ -38,6 +38,29 @@ function clearProject() {
     pageContainer.removeChild(document.querySelector('.add-todo'));
 }
 
+function addSelect(name, disabled = false, parent, priority) {
+    priority = priority || '';
+    const select = addElement(name, '', parent, 'select', true);
+    select.disabled = disabled;
+    const defaultOption = addElement('option', 'Set priority', select, 'option', true);
+    defaultOption.setAttribute('disabled', true);
+    defaultOption.setAttribute('hidden', true);
+    defaultOption.setAttribute('value', '');
+    addElement('option', 'Low', select, 'option', true);
+    addElement('option', 'Medium', select, 'option', true);
+    addElement('option', 'High', select, 'option', true);
+    if (priority === '') {
+    } else {
+        //answer by Sébastien: https://stackoverflow.com/questions/19611557/how-to-set-default-value-for-html-select
+        for (let options, index = 0; options = select.options[index]; index++) {
+            if (options.value === priority) {
+                select.selectedIndex = index;
+                break;
+            }
+        }
+    }
+}
+
 function addTodoDOM(title, desc, dueDate, priority) {
     title = title || '';
     desc = desc || '';
@@ -46,19 +69,7 @@ function addTodoDOM(title, desc, dueDate, priority) {
     addInput('todo-title', title, todoContainer, '', true);
     addInput('todo-desc', desc, todoContainer, '', true);
     addInput('due-date', dueDate, todoContainer, '', true, 'date');
-    if (document.querySelector('.priority-select').value === 'Set priority') {
-    } else {
-        const select = addElement('todo-select', '', todoContainer, 'select');
-        select.disabled = true;
-        addElement('option', 'Set priority', select, 'option', false);
-        addElement('option', 'Low', select, 'option', false);
-        addElement('option', 'Medium', select, 'option', false);
-        addElement('option', 'High', select, 'option', false);
-        const options = document.querySelectorAll('.todo-select>option');
-        options.forEach(item => {
-            if (priority === item.textContent) item.setAttribute('selected', '');
-        })
-    }
+    addSelect('todo-select', true, todoContainer, priority);
     init.add();
 }
 
@@ -69,18 +80,15 @@ function addModal() {
     addInput('todo-input-title', '', dialogForm, '', false);
     addInput('todo-input-desc', '', dialogForm, '', false);
     addInput('due-date', '', dialogForm, '', false, 'date');
-    const select = addElement('priority-select', '', dialogForm, 'select', false);
-    addElement('', 'Set priority', select, 'option', false);
-    addElement('', 'Low', select, 'option', false);
-    addElement('', 'Medium', select, 'option', false);
-    addElement('', 'High', select, 'option', false);
-    addElement('todo-confirm', '+', dialogForm, 'button', false);
+    addSelect('priority-select', false, dialogForm, '');
+    addElement('todo-confirm', '+', dialogForm, 'button', true);
 }
 
-function addProjectDOM() {
+function addProjectDOM(title) {
+    title = title || '';
     addElement('project-container', '', document.querySelector('.page-container'), '', false);
     addModal();
-    addInput('project-title', '', document.querySelector('.project-container'), 'Project Title', false);
+    addInput('project-title', title, document.querySelector('.project-container'), 'Project Title', false);
     addElement('add-todo', '+', document.querySelector('.page-container'), 'button', false);
 }
 addProjectDOM();

@@ -1,9 +1,8 @@
 let projectList = [];
 
-function addProject(title) {
-    let todoList = [];
+function addProject(title, todoList) {
     title = title || '';
-    todoList = [];
+    todoList = todoList || [];
     return { title, todoList };
 }
 

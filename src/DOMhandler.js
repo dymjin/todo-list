@@ -61,15 +61,42 @@ function addSelect(name, disabled = false, parent, priority) {
     }
 }
 
-function addTodoDOM(title, desc, dueDate, priority) {
-    title = title || '';
-    desc = desc || '';
+function addChecklist(parent, checklist, disabled = false) {
+    if (!checklist) {
+        const label = addElement('', '', parent, 'label', true);
+        addInput('checklist-item', '', label, '', disabled, 'checkbox');
+        addInput('checklist-item-name', '', label, '', disabled);
+        return label;
+    } else {
+        const label = addElement('checklist-item-container', '', parent, 'label', true);
+        const checkbox = addInput('checklist-item', '', label, '', disabled, 'checkbox');
+        checkbox.checked = checklist.state;
+        addInput('checklist-item-title', checklist.title, label, '', disabled);
+        return label;
+    }
+}
+
+function addTodoDOM(title, desc, dueDate, priority, notes, lists) {
+    title = title || 'title';
+    desc = desc || 'desc';
+    notes = notes || 'notes';
+    lists = lists || [];
     addElement('todo-container', '', document.querySelector('.project-container'), '', true);
     const todoContainer = document.querySelector(`.todo-container[data="${init.get()}"]`);
-    addInput('todo-title', title, todoContainer, '', true);
-    addInput('todo-desc', desc, todoContainer, '', true);
+    addElement('todo-title', title, todoContainer, '', true);
+    addElement('todo-desc', desc, todoContainer, '', true);
     addInput('due-date', dueDate, todoContainer, '', true, 'date');
     addSelect('todo-select', true, todoContainer, priority);
+    addElement('todo-notes', notes, todoContainer, 'div', true);
+    const todoChecklistContainer = addElement('todo-checklist-container', '', todoContainer, '', true);
+    if (lists) {
+        lists.forEach(item => {
+            const label = addElement('checklist-item-container', '', todoChecklistContainer, 'label', true);
+            const checkbox = addInput('checklist-item', '', label, '', true, 'checkbox');
+            checkbox.checked = item.state;
+            addInput('checklist-item-title', item.title, label, '', true);
+        });
+    }
     init.add();
 }
 
@@ -81,16 +108,20 @@ function addModal() {
     addInput('todo-input-desc', '', dialogForm, '', false);
     addInput('due-date', '', dialogForm, '', false, 'date');
     addSelect('priority-select', false, dialogForm, '');
+    addInput('notes-input', '', dialogForm, 'Add note', false, 'textarea');
+    addElement('add-checkbox', 'add-checkbox', dialogForm, 'button');
+    const checklistContainer = addElement('checklist-container', '', dialogForm, 'ul');
+    checklistContainer.hidden = true;
     addElement('todo-confirm', '+', dialogForm, 'button', true);
 }
 
 function addProjectDOM(title) {
     title = title || '';
-    addElement('project-container', '', document.querySelector('.page-container'), '', false);
+    const projectContainer = addElement('project-container', '', document.querySelector('.page-container'), '', false);
     addModal();
     addInput('project-title', title, document.querySelector('.project-container'), 'Project Title', false);
-    addElement('add-todo', '+', document.querySelector('.page-container'), 'button', false);
+    addElement('add-todo', '+', projectContainer, 'button', false);
 }
 addProjectDOM();
 
-export { addProjectDOM, addTodoDOM, clearProject, init };
+export { addProjectDOM, addTodoDOM, clearProject, addChecklist };

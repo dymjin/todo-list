@@ -61,26 +61,26 @@ function addSelect(name, disabled = false, parent, priority) {
     }
 }
 
-function addChecklist(parent, checklist, disabled = false) {
-    if (!checklist) {
-        const label = addElement('', '', parent, 'label', true);
+function addChecklist(parent, checkboxArr, disabled = false) {
+    if (!checkboxArr) {
+        const label = addElement('', '', parent, 'label');
         addInput('checklist-item', '', label, '', disabled, 'checkbox');
         addInput('checklist-item-name', '', label, '', disabled);
         return label;
     } else {
-        const label = addElement('checklist-item-container', '', parent, 'label', true);
-        const checkbox = addInput('checklist-item', '', label, '', disabled, 'checkbox');
-        checkbox.checked = checklist.state;
-        addInput('checklist-item-title', checklist.title, label, '', disabled);
-        return label;
+        checkboxArr.forEach(item => {
+            const label = addElement('checklist-item-container', '', parent, 'label');
+            const checkbox = addInput('checklist-item', '', label, '', disabled, 'checkbox');
+            checkbox.checked = item.state;
+            addInput('checklist-item-title', item.title, label, '', disabled);
+        });
     }
 }
 
-function addTodoDOM(title, desc, dueDate, priority, notes, lists) {
+function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
     title = title || 'title';
     desc = desc || 'desc';
     notes = notes || 'notes';
-    lists = lists || [];
     addElement('todo-container', '', document.querySelector('.project-container'), '', true);
     const todoContainer = document.querySelector(`.todo-container[data="${init.get()}"]`);
     addElement('todo-title', title, todoContainer, '', true);
@@ -89,13 +89,8 @@ function addTodoDOM(title, desc, dueDate, priority, notes, lists) {
     addSelect('todo-select', true, todoContainer, priority);
     addElement('todo-notes', notes, todoContainer, 'div', true);
     const todoChecklistContainer = addElement('todo-checklist-container', '', todoContainer, '', true);
-    if (lists) {
-        lists.forEach(item => {
-            const label = addElement('checklist-item-container', '', todoChecklistContainer, 'label', true);
-            const checkbox = addInput('checklist-item', '', label, '', true, 'checkbox');
-            checkbox.checked = item.state;
-            addInput('checklist-item-title', item.title, label, '', true);
-        });
+    if (checkboxArr) {
+        addChecklist(todoChecklistContainer, checkboxArr);
     }
     init.add();
 }

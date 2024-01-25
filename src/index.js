@@ -51,9 +51,9 @@ function addListeners() {
     document.querySelector('.todo-confirm').addEventListener('click', (event) => {
         event.preventDefault();
         const checklistChildren = document.querySelector('.checklist-container').childNodes;
-        let list = [];
+        let checkboxArr = [];
         checklistChildren.forEach(child => {
-            list.push({ title: child.children[1].value, state: child.children[0].checked ? "pending" : 'complete' })
+            checkboxArr.push({ title: child.children[1].value, state: child.children[0].checked })
         })
         const newTodo = todoCreation.addTodo(
             document.querySelector('.todo-input-title').value,
@@ -61,34 +61,27 @@ function addListeners() {
             document.querySelector('.due-date').value,
             document.querySelector('.priority-select').value,
             document.querySelector('.notes-input').value,
-            list
+            checkboxArr
         );
         currentProject.todoList.push(newTodo);
         console.log(newTodo)
-        DOMhandler.addTodoDOM(newTodo.title, newTodo.desc, newTodo.dueDate, newTodo.priority, newTodo.notes, newTodo.lists);
+        DOMhandler.addTodoDOM(newTodo.title, newTodo.desc, newTodo.dueDate, newTodo.priority, newTodo.notes, newTodo.checkboxArr);
         document.querySelector('.todo-input-title').value = '';
         document.querySelector('.todo-input-desc').value = '';
         document.querySelector('.due-date').value = '';
         document.querySelector('.priority-select').value = '';
+        document.querySelector('.notes-input').value = '';
+        while (document.querySelector('.checklist-container').firstChild) {
+            document.querySelector('.checklist-container').removeChild(document.querySelector('.checklist-container').firstChild);
+        }
+        document.querySelector('.checklist-container').hidden = true;
         document.querySelector('.todo-dialog').close();
-    });
-
-    document.querySelector('button.add-checkbox').addEventListener('click', () => {
-        // if (checklist.length) {
-        //     checklist.forEach(item => {
-        //         DOMhandler.addChecklist(item);
-        //     });
-        // } else {
-        //     DOMhandler.addChecklist();
-        // }
-        // currentProject.todoList[0].lists.push(checklist);
-        // console.log(currentProject.todoList)
     });
 
     document.querySelector('.add-checkbox').addEventListener('click', (e) => {
         e.preventDefault();
         document.querySelector('.checklist-container').hidden = false;
-        // let checklist = [{ title: "square", state: true }, { title: "circle", state: false }]
+        let arr = [{ title: "square", state: true }, { title: "circle", state: false }]
         DOMhandler.addChecklist(document.querySelector('.checklist-container'));
     });
 

@@ -6,83 +6,98 @@ let currentProject = projectCreation.addProject();
 projectCreation.projectList.push(currentProject);
 
 document.querySelector('.add-project').addEventListener('click', () => {
-    DOMhandler.clearProject();
-    DOMhandler.addProjectDOM();
-    addListeners();
-    currentProject = projectCreation.addProject(document.querySelector('.project-title').value);
-    projectCreation.projectList.push(currentProject);
+    // DOMhandler.clearProjectDOM();
+    // DOMhandler.addProjectDOM();
+    // addListeners();
+    // currentProject = projectCreation.addProject(document.querySelector('.project-title').value);
+    // projectCreation.projectList.push(currentProject);
 });
 
-const btn = document.createElement('button');
-btn.textContent = 'write';
-btn.addEventListener('click', () => {
-    DOMhandler.clearProject();
-    DOMhandler.addProjectDOM();
-});
-document.body.appendChild(btn);
+// const btn = document.createElement('button');
+// btn.textContent = 'write';
+// btn.addEventListener('click', () => {
+//     DOMhandler.clearProjectDOM();
+//     DOMhandler.addProjectDOM();
+//     addListeners();
+// });
+// document.body.appendChild(btn);
 
-let copy;
-function clearProjectObj() {
-    while (projectCreation.projectList.length > 0) {
-        projectCreation.projectList.pop();
-    }
+// function clearProjectObj() {
+//     while (projectCreation.projectList.length > 0) {
+//         projectCreation.projectList.pop();
+//     }
+// }
+
+// let copy;
+// const restoreBtn = document.createElement('button');
+// restoreBtn.textContent = 'read';
+// restoreBtn.addEventListener('click', () => {
+//     copy = projectCreation.projectList;
+//     const restoredProject = projectCreation.addProject(copy[0].title, copy[0].todoList);
+//     clearProjectObj();
+//     DOMhandler.clearProjectDOM();
+//     DOMhandler.addProjectDOM(restoredProject.title);
+//     addListeners();
+//     restoredProject.todoList.forEach(item => {
+//         DOMhandler.addTodoDOM(item.title, item.desc, item.dueDate, item.priority, item.notes, item.checkboxArr);
+//     })
+//     console.log(restoredProject)
+// })
+// document.body.appendChild(restoreBtn);
+
+function addInputListeners() {
+    let counter = 0;
+    const todoContainer = document.querySelector('.todo-container');
+    todoContainer.childNodes[0].addEventListener('change', () => {
+        currentProject.todoList[DOMhandler.init.get() - 2].title = todoContainer.childNodes[0].value
+        console.log(currentProject.todoList)
+    });
+    todoContainer.childNodes[1].addEventListener('change', () => {
+        currentProject.todoList[DOMhandler.init.get() - 2].desc = todoContainer.childNodes[1].value
+        console.log(currentProject.todoList)
+    });
+    todoContainer.childNodes[2].addEventListener('change', () => {
+        currentProject.todoList[DOMhandler.init.get() - 2].dueDate = todoContainer.childNodes[2].value
+        console.log(currentProject.todoList)
+    });
+    todoContainer.childNodes[3].addEventListener('change', () => {
+        currentProject.todoList[DOMhandler.init.get() - 2].priority = todoContainer.childNodes[3].value
+        console.log(currentProject.todoList)
+    });
+    todoContainer.childNodes[5].addEventListener('click', () => {
+        const checklistContainer = document.querySelector('.checklist-container')
+        const label = DOMhandler.addChecklist(checklistContainer);
+        currentProject.todoList[DOMhandler.init.get() - 2]
+            .checkboxArr
+            .push({ title: label.children[1].value, state: label.children[0].checked });
+        label.children[0].setAttribute('data', counter);
+        label.children[0].addEventListener('change', () => {
+            currentProject
+                .todoList[DOMhandler.init.get() - 2].checkboxArr[label.children[0].getAttribute('data')].state = label.children[0].checked
+            // console.log(currentProject
+            //     .todoList[DOMhandler.init.get() - 2].checkboxArr)
+        })
+        label.children[1].setAttribute('data', counter);
+        label.children[1].addEventListener('change', () => {
+            currentProject
+                .todoList[DOMhandler.init.get() - 2].checkboxArr[label.children[1].getAttribute('data')].title = label.children[1].value
+            // console.log(currentProject
+            //     .todoList[DOMhandler.init.get() - 2].checkboxArr)
+        })
+        counter++;
+    });
+
 }
-
-const restoreBtn = document.createElement('button');
-restoreBtn.textContent = 'read';
-restoreBtn.addEventListener('click', () => {
-    copy = projectCreation.projectList;
-    const restoredProject = projectCreation.addProject(copy[0].title, copy[0].todoList);
-    clearProjectObj();
-    DOMhandler.clearProject();
-    DOMhandler.addProjectDOM(restoredProject.title);
-    restoredProject.todoList.forEach(item => {
-        DOMhandler.addTodoDOM(item.title, item.desc, item.dueDate, item.priority);
-    })
-    console.log(restoredProject)
-})
-document.body.appendChild(restoreBtn);
 
 function addListeners() {
     document.querySelector('.add-todo').addEventListener('click', () => {
-        document.querySelector('.todo-dialog').showModal();
-    });
-
-    document.querySelector('.todo-confirm').addEventListener('click', (event) => {
-        event.preventDefault();
-        const checklistChildren = document.querySelector('.checklist-container').childNodes;
-        let checkboxArr = [];
-        checklistChildren.forEach(child => {
-            checkboxArr.push({ title: child.children[1].value, state: child.children[0].checked })
-        })
-        const newTodo = todoCreation.addTodo(
-            document.querySelector('.todo-input-title').value,
-            document.querySelector('.todo-input-desc').value,
-            document.querySelector('.due-date').value,
-            document.querySelector('.priority-select').value,
-            document.querySelector('.notes-input').value,
-            checkboxArr
-        );
-        currentProject.todoList.push(newTodo);
-        console.log(newTodo)
-        DOMhandler.addTodoDOM(newTodo.title, newTodo.desc, newTodo.dueDate, newTodo.priority, newTodo.notes, newTodo.checkboxArr);
-        document.querySelector('.todo-input-title').value = '';
-        document.querySelector('.todo-input-desc').value = '';
-        document.querySelector('.due-date').value = '';
-        document.querySelector('.priority-select').value = '';
-        document.querySelector('.notes-input').value = '';
-        while (document.querySelector('.checklist-container').firstChild) {
-            document.querySelector('.checklist-container').removeChild(document.querySelector('.checklist-container').firstChild);
+        const todo = todoCreation.addTodo();
+        currentProject.todoList.push(todo)
+        if (document.querySelector('.todo-container')) {
+            DOMhandler.clearTodoDOM();
         }
-        document.querySelector('.checklist-container').hidden = true;
-        document.querySelector('.todo-dialog').close();
-    });
-
-    document.querySelector('.add-checkbox').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.querySelector('.checklist-container').hidden = false;
-        let arr = [{ title: "square", state: true }, { title: "circle", state: false }]
-        DOMhandler.addChecklist(document.querySelector('.checklist-container'));
+        DOMhandler.addTodoDOM(todo.title, todo.desc, todo.dueDate, todo.priority, todo.notes, todo.checkboxArr);
+        addInputListeners();
     });
 
     document.querySelector('.project-title').addEventListener('change', () => {

@@ -4,11 +4,10 @@ const init = (() => {
     let i = 1;
     const add = () => { i++; };
     const get = () => { return i };
-    const addBtn = () => { addElement('add-project', 'new project', document.querySelector('.page-container'), 'button'); };
-    return { add, get, addBtn };
+    return { add, get };
 })();
 
-init.addBtn();
+addElement('add-project', 'new project', document.querySelector('.page-container'), 'button');
 
 function addElement(name, text, parent, type, data = false) {
     type = type || 'div';
@@ -32,10 +31,14 @@ function addInput(name, text, parent, placeholder, disabled, type) {
     return input;
 }
 
-function clearProject() {
+function clearProjectDOM() {
     const pageContainer = document.querySelector('.page-container');
     pageContainer.removeChild(document.querySelector('.project-container'));
-    pageContainer.removeChild(document.querySelector('.add-todo'));
+}
+
+function clearTodoDOM() {
+    const projectContainer = document.querySelector('.project-container');
+    projectContainer.removeChild(document.querySelector('.todo-container'));
 }
 
 function addSelect(name, disabled = false, parent, priority) {
@@ -59,6 +62,7 @@ function addSelect(name, disabled = false, parent, priority) {
             }
         }
     }
+    return select;
 }
 
 function addChecklist(parent, checkboxArr, disabled = false) {
@@ -78,45 +82,29 @@ function addChecklist(parent, checkboxArr, disabled = false) {
 }
 
 function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
-    title = title || 'title';
-    desc = desc || 'desc';
-    notes = notes || 'notes';
+    notes = notes || 'lol';
     addElement('todo-container', '', document.querySelector('.project-container'), '', true);
     const todoContainer = document.querySelector(`.todo-container[data="${init.get()}"]`);
-    addElement('todo-title', title, todoContainer, '', true);
-    addElement('todo-desc', desc, todoContainer, '', true);
-    addInput('due-date', dueDate, todoContainer, '', true, 'date');
-    addSelect('todo-select', true, todoContainer, priority);
-    addElement('todo-notes', notes, todoContainer, 'div', true);
-    const todoChecklistContainer = addElement('todo-checklist-container', '', todoContainer, '', true);
-    if (checkboxArr) {
-        addChecklist(todoChecklistContainer, checkboxArr);
+    addInput('todo-title', title, todoContainer, 'Title', false);
+    addInput('todo-desc', desc, todoContainer, 'Description', false);
+    addInput('due-date', dueDate, todoContainer, '', false, 'date');
+    const select = addSelect('todo-select', false, todoContainer, priority);
+    if (priority) {
+        select.value = priority;
     }
+    addElement('todo-notes', notes, todoContainer, 'div');
+    addElement('add-checklist', 'add checklist', todoContainer, 'button');
+    const checklistContainer = addElement('checklist-container', '', todoContainer, '', true);
+    addChecklist(checklistContainer, checkboxArr);
     init.add();
-}
-
-function addModal() {
-    const dialogContainer = addElement('dialog-container', '', document.querySelector('.project-container'), '', false);
-    const todoDialog = addElement('todo-dialog', '', dialogContainer, 'dialog', false);
-    const dialogForm = addElement('dialog-form', '', todoDialog, 'form', false);
-    addInput('todo-input-title', '', dialogForm, '', false);
-    addInput('todo-input-desc', '', dialogForm, '', false);
-    addInput('due-date', '', dialogForm, '', false, 'date');
-    addSelect('priority-select', false, dialogForm, '');
-    addInput('notes-input', '', dialogForm, 'Add note', false, 'textarea');
-    addElement('add-checkbox', 'add-checkbox', dialogForm, 'button');
-    const checklistContainer = addElement('checklist-container', '', dialogForm, 'ul');
-    checklistContainer.hidden = true;
-    addElement('todo-confirm', '+', dialogForm, 'button', true);
 }
 
 function addProjectDOM(title) {
     title = title || '';
     const projectContainer = addElement('project-container', '', document.querySelector('.page-container'), '', false);
-    addModal();
     addInput('project-title', title, document.querySelector('.project-container'), 'Project Title', false);
-    addElement('add-todo', '+', projectContainer, 'button', false);
+    addElement('add-todo', 'add todo', projectContainer, 'button', false);
 }
 addProjectDOM();
 
-export { addProjectDOM, addTodoDOM, clearProject, addChecklist };
+export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, init };

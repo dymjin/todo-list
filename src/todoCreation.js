@@ -1,12 +1,13 @@
 import { format } from "date-fns";
-import * as projectCreation from './projectCreation.js';
 
 function addTodo(title, desc, dueDate, priority, notes, checkboxArr, status) {
+    title = title || '';
+    desc = desc || '';
+    dueDate = dueDate || format(new Date(), "yyyy-MM-dd");
     priority = priority || '';
     notes = notes || '';
-    status = status || 'pending';
     checkboxArr = checkboxArr || [];
-    dueDate = dueDate || format(new Date(), "yyyy-MM-dd");
+    status = status || 'pending';
     return { title, desc, dueDate, priority, notes, checkboxArr, status };
 }
 

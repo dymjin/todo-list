@@ -6,11 +6,14 @@ let currentProject = projectCreation.addProject();
 projectCreation.projectList.push(currentProject);
 
 document.querySelector('.add-project').addEventListener('click', () => {
-    // DOMhandler.clearProjectDOM();
-    // DOMhandler.addProjectDOM();
-    // addListeners();
-    // currentProject = projectCreation.addProject(document.querySelector('.project-title').value);
-    // projectCreation.projectList.push(currentProject);
+    if (document.querySelector('.project-container')) {
+        DOMhandler.clearProjectDOM();
+    }
+    DOMhandler.addProjectDOM();
+    DOMhandler.init.set(0);
+    addListeners();
+    currentProject = projectCreation.addProject(document.querySelector('.project-title').value);
+    projectCreation.projectList.push(currentProject);
 });
 
 // const btn = document.createElement('button');
@@ -49,44 +52,43 @@ function addInputListeners() {
     let counter = 0;
     const todoContainer = document.querySelector('.todo-container');
     todoContainer.childNodes[0].addEventListener('change', () => {
-        currentProject.todoList[DOMhandler.init.get() - 2].title = todoContainer.childNodes[0].value
-        console.log(currentProject.todoList)
+        currentProject.todoList[DOMhandler.init.get() - 1].title = todoContainer.childNodes[0].value
+        // console.log(currentProject.todoList)
     });
     todoContainer.childNodes[1].addEventListener('change', () => {
-        currentProject.todoList[DOMhandler.init.get() - 2].desc = todoContainer.childNodes[1].value
-        console.log(currentProject.todoList)
+        currentProject.todoList[DOMhandler.init.get() - 1].desc = todoContainer.childNodes[1].value
+        // console.log(currentProject.todoList)
     });
     todoContainer.childNodes[2].addEventListener('change', () => {
-        currentProject.todoList[DOMhandler.init.get() - 2].dueDate = todoContainer.childNodes[2].value
-        console.log(currentProject.todoList)
+        currentProject.todoList[DOMhandler.init.get() - 1].dueDate = todoContainer.childNodes[2].value
+        // console.log(currentProject.todoList)
     });
     todoContainer.childNodes[3].addEventListener('change', () => {
-        currentProject.todoList[DOMhandler.init.get() - 2].priority = todoContainer.childNodes[3].value
-        console.log(currentProject.todoList)
+        currentProject.todoList[DOMhandler.init.get() - 1].priority = todoContainer.childNodes[3].value
+        // console.log(currentProject.todoList)
     });
     todoContainer.childNodes[5].addEventListener('click', () => {
         const checklistContainer = document.querySelector('.checklist-container')
         const label = DOMhandler.addChecklist(checklistContainer);
-        currentProject.todoList[DOMhandler.init.get() - 2]
+        currentProject.todoList[DOMhandler.init.get() - 1]
             .checkboxArr
             .push({ title: label.children[1].value, state: label.children[0].checked });
         label.children[0].setAttribute('data', counter);
         label.children[0].addEventListener('change', () => {
             currentProject
-                .todoList[DOMhandler.init.get() - 2].checkboxArr[label.children[0].getAttribute('data')].state = label.children[0].checked
+                .todoList[DOMhandler.init.get() - 1].checkboxArr[label.children[0].getAttribute('data')].state = label.children[0].checked
             // console.log(currentProject
             //     .todoList[DOMhandler.init.get() - 2].checkboxArr)
         })
         label.children[1].setAttribute('data', counter);
         label.children[1].addEventListener('change', () => {
             currentProject
-                .todoList[DOMhandler.init.get() - 2].checkboxArr[label.children[1].getAttribute('data')].title = label.children[1].value
+                .todoList[DOMhandler.init.get() - 1].checkboxArr[label.children[1].getAttribute('data')].title = label.children[1].value
             // console.log(currentProject
             //     .todoList[DOMhandler.init.get() - 2].checkboxArr)
         })
         counter++;
     });
-
 }
 
 function addListeners() {

@@ -1,10 +1,11 @@
 import styles from './style.css';
 
 const init = (() => {
-    let i = 1;
+    let i = 0;
     const add = () => { i++; };
     const get = () => { return i };
-    return { add, get };
+    const set = (newVal) => { i = newVal }
+    return { add, get, set };
 })();
 
 addElement('add-project', 'new project', document.querySelector('.page-container'), 'button');

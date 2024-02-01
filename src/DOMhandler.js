@@ -8,29 +8,9 @@ const init = (() => {
     return { add, get, set };
 })();
 
-addElement('add-project', 'new project', document.querySelector('.page-container'), 'button');
-
-function addElement(name, text, parent, type, data = false) {
-    type = type || 'div';
-    const elem = document.createElement(type);
-    name ? elem.className = name : name = '';
-    text ? elem.textContent = text : text = '';
-    data ? elem.setAttribute('data', init.get()) : data = '';
-    parent.appendChild(elem);
-    return elem;
-}
-
-function addInput(name, text, parent, placeholder, disabled, type) {
-    const input = document.createElement('input');
-    type = type || 'text';
-    input.setAttribute('type', type);
-    placeholder ? input.setAttribute('placeholder', placeholder) : placeholder = '';
-    text ? input.value = text : text = '';
-    input.className = name;
-    disabled ? input.disabled = true : disabled = false;
-    parent.appendChild(input);
-    return input;
-}
+addElement('add-project', 'new project',
+    document.querySelector('.projectlist-container'),
+    'button');
 
 function clearProjectDOM() {
     const pageContainer = document.querySelector('.page-container');
@@ -42,17 +22,40 @@ function clearTodoDOM() {
     projectContainer.removeChild(document.querySelector('.todo-container'));
 }
 
-function addSelect(name, disabled = false, parent, priority) {
+function addElement(name, text, parent, type) {
+    type = type || 'div';
+    const elem = document.createElement(type);
+    if (name) { elem.className = name }
+    else { name = '' };
+    if (text) { elem.textContent = text }
+    else { text = '' };
+    parent.appendChild(elem);
+    return elem;
+}
+
+function addInput(name, text, parent, placeholder, type) {
+    type = type || 'text';
+    const input = document.createElement('input');
+    input.setAttribute('type', type);
+    if (placeholder) { input.setAttribute('placeholder', placeholder) }
+    else { placeholder = '' };
+    if (text) { input.value = text }
+    else { text = '' };
+    input.className = name;
+    parent.appendChild(input);
+    return input;
+}
+
+function addSelect(name, parent, priority) {
     priority = priority || '';
-    const select = addElement(name, '', parent, 'select', true);
-    select.disabled = disabled;
-    const defaultOption = addElement('option', 'Set priority', select, 'option', true);
+    const select = addElement(name, '', parent, 'select');
+    const defaultOption = addElement('option', 'Set priority', select, 'option');
     defaultOption.setAttribute('disabled', true);
     defaultOption.setAttribute('hidden', true);
     defaultOption.setAttribute('value', '');
-    addElement('option', 'Low', select, 'option', true);
-    addElement('option', 'Medium', select, 'option', true);
-    addElement('option', 'High', select, 'option', true);
+    addElement('option', 'Low', select, 'option');
+    addElement('option', 'Medium', select, 'option');
+    addElement('option', 'High', select, 'option');
     if (priority === '') {
     } else {
         //answer by Sébastien: https://stackoverflow.com/questions/19611557/how-to-set-default-value-for-html-select
@@ -66,46 +69,49 @@ function addSelect(name, disabled = false, parent, priority) {
     return select;
 }
 
-function addChecklist(parent, checkboxArr, disabled = false) {
+function addChecklist(parent, checkboxArr) {
     if (!checkboxArr) {
         const label = addElement('', '', parent, 'label');
-        addInput('checklist-item', '', label, '', disabled, 'checkbox');
-        addInput('checklist-item-name', '', label, '', disabled);
+        addInput('checklist-item', '', label, '', 'checkbox');
+        addInput('checklist-item-name', '', label, 'item name');
         return label;
     } else {
         checkboxArr.forEach(item => {
             const label = addElement('checklist-item-container', '', parent, 'label');
-            const checkbox = addInput('checklist-item', '', label, '', disabled, 'checkbox');
+            const checkbox = addInput('checklist-item', '', label, '', 'checkbox');
             checkbox.checked = item.state;
-            addInput('checklist-item-title', item.title, label, '', disabled);
+            addInput('checklist-item-title', item.title, label, '');
         });
     }
 }
 
 function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
     notes = notes || 'lol';
-    addElement('todo-container', '', document.querySelector('.project-container'), '', true);
-    const todoContainer = document.querySelector(`.todo-container[data="${init.get()}"]`);
-    addInput('todo-title', title, todoContainer, 'Title', false);
-    addInput('todo-desc', desc, todoContainer, 'Description', false);
-    addInput('due-date', dueDate, todoContainer, '', false, 'date');
-    const select = addSelect('todo-select', false, todoContainer, priority);
+    const todoContainer = addElement('todo-container', '', document.querySelector('.project-container'));
+    addInput('todo-title', title, todoContainer, 'Title');
+    addInput('todo-desc', desc, todoContainer, 'Description');
+    addInput('due-date', dueDate, todoContainer, '', 'date');
+    const select = addSelect('todo-select', todoContainer, priority);
     if (priority) {
         select.value = priority;
     }
-    addElement('todo-notes', notes, todoContainer, 'div');
+    addElement('todo-notes', notes, todoContainer);
     addElement('add-checklist', 'add checklist', todoContainer, 'button');
-    const checklistContainer = addElement('checklist-container', '', todoContainer, '', true);
-    addChecklist(checklistContainer, checkboxArr);
-    init.add();
+    const checklistContainer = addElement('checklist-container', '', todoContainer);
+    if (checkboxArr) {
+        addChecklist(checklistContainer, checkboxArr);
+    }
 }
 
 function addProjectDOM(title) {
     title = title || '';
-    const projectContainer = addElement('project-container', '', document.querySelector('.page-container'), '', false);
-    addInput('project-title', title, document.querySelector('.project-container'), 'Project Title', false);
+    const projectContainer = addElement('project-container', '', document.querySelector('.page-container'));
+    const projectTitle = addInput('project-title', title, projectContainer, 'Project Title');
     addElement('add-todo', 'add todo', projectContainer, 'button', false);
-}
-addProjectDOM();
+    // const project = addElement('project', 'test', document.querySelector('.projectlist-container'));
+    // return project;
 
-export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, init };
+}
+// addProjectDOM();
+
+export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, addElement };

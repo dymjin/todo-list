@@ -2,18 +2,40 @@ import * as DOMhandler from './DOMhandler.js';
 import * as todoCreation from './todoCreation.js';
 import * as projectCreation from './projectCreation.js';
 
-let currentProject = projectCreation.addProject();
-projectCreation.projectList.push(currentProject);
 
-document.querySelector('.add-project').addEventListener('click', () => {
+let currentProject, currentTodo, todoID = 1, projectID = 1;
+initProject();
+addListeners();
+
+function initProject() {
+    currentProject = projectCreation.addProject();
+    projectCreation.projectList.push(currentProject);
+    currentProject.id = projectID;
+
     if (document.querySelector('.project-container')) {
         DOMhandler.clearProjectDOM();
     }
     DOMhandler.addProjectDOM();
-    DOMhandler.init.set(0);
+
+    const project = DOMhandler.addElement('project', 'test', document.querySelector('.projectlist-container'));
+    const rmvBtn = DOMhandler.addElement('remove', 'remove', project, 'button');
+    rmvBtn.addEventListener('click', () => {
+        document.querySelector('.projectlist-container').removeChild(project);
+        const projectList = projectCreation.projectList;
+        projectList.splice(projectList.findIndex(({ id }) => id === project.getAttribute('data') - 1), 1);
+    });
+
+    project.setAttribute('data', currentProject.id);
+    project.addEventListener('click', () => {
+        console.log(project.getAttribute('data'))
+    })
+    projectID++;
+    return currentProject;
+}
+
+document.querySelector('.add-project').addEventListener('click', () => {
+    initProject();
     addListeners();
-    currentProject = projectCreation.addProject(document.querySelector('.project-title').value);
-    projectCreation.projectList.push(currentProject);
 });
 
 // const btn = document.createElement('button');
@@ -49,62 +71,62 @@ document.querySelector('.add-project').addEventListener('click', () => {
 // document.body.appendChild(restoreBtn);
 
 function addInputListeners() {
-    let counter = 0;
+    let checkboxIndex = 0;
     const todoContainer = document.querySelector('.todo-container');
-    todoContainer.childNodes[0].addEventListener('change', () => {
-        currentProject.todoList[DOMhandler.init.get() - 1].title = todoContainer.childNodes[0].value
-        // console.log(currentProject.todoList)
-    });
-    todoContainer.childNodes[1].addEventListener('change', () => {
-        currentProject.todoList[DOMhandler.init.get() - 1].desc = todoContainer.childNodes[1].value
-        // console.log(currentProject.todoList)
-    });
-    todoContainer.childNodes[2].addEventListener('change', () => {
-        currentProject.todoList[DOMhandler.init.get() - 1].dueDate = todoContainer.childNodes[2].value
-        // console.log(currentProject.todoList)
-    });
-    todoContainer.childNodes[3].addEventListener('change', () => {
-        currentProject.todoList[DOMhandler.init.get() - 1].priority = todoContainer.childNodes[3].value
-        // console.log(currentProject.todoList)
-    });
+    let todoIndex = currentProject.todoList.findIndex(({ id }) => id === currentTodo.id);
+    const todoChildren = todoContainer.childNodes;
+    for (let i = 0; i < 5; i++) {
+        todoChildren[i].addEventListener('change', () => {
+            currentProject.todoList[todoIndex - 1].title = todoChildren[0].value;
+            currentProject.todoList[todoIndex - 1].desc = todoChildren[1].value;
+            currentProject.todoList[todoIndex - 1].dueDate = todoChildren[2].value;
+            currentProject.todoList[todoIndex - 1].priority = todoChildren[3].value;
+            currentProject.todoList[todoIndex - 1].notes = todoChildren[4].value;
+            console.log(currentProject.todoList)
+        })
+    }
     todoContainer.childNodes[5].addEventListener('click', () => {
         const checklistContainer = document.querySelector('.checklist-container')
         const label = DOMhandler.addChecklist(checklistContainer);
-        currentProject.todoList[DOMhandler.init.get() - 1]
+        const labelChildren = label.childNodes;
+        currentProject.todoList[todoIndex - 1]
             .checkboxArr
             .push({ title: label.children[1].value, state: label.children[0].checked });
-        label.children[0].setAttribute('data', counter);
-        label.children[0].addEventListener('change', () => {
-            currentProject
-                .todoList[DOMhandler.init.get() - 1].checkboxArr[label.children[0].getAttribute('data')].state = label.children[0].checked
-            // console.log(currentProject
-            //     .todoList[DOMhandler.init.get() - 2].checkboxArr)
-        })
-        label.children[1].setAttribute('data', counter);
-        label.children[1].addEventListener('change', () => {
-            currentProject
-                .todoList[DOMhandler.init.get() - 1].checkboxArr[label.children[1].getAttribute('data')].title = label.children[1].value
-            // console.log(currentProject
-            //     .todoList[DOMhandler.init.get() - 2].checkboxArr)
-        })
-        counter++;
+        for (let i = 0; i < 2; i++) {
+            labelChildren[i].setAttribute('data', checkboxIndex);
+            labelChildren[i].addEventListener('change', () => {
+                currentProject.todoList[todoIndex - 1]
+                    .checkboxArr[labelChildren[0]
+                        .getAttribute('data')].state = labelChildren[0].checked;
+                currentProject.todoList[todoIndex - 1]
+                    .checkboxArr[labelChildren[1]
+                        .getAttribute('data')].title = labelChildren[1].value;
+            })
+        }
+        checkboxIndex++;
     });
+    todoIndex++;
+}
+
+function todoInit() {
+    currentTodo = todoCreation.addTodo();
+    currentProject.todoList.push(currentTodo);
+    currentTodo.id = todoID;
+    if (document.querySelector('.todo-container')) {
+        DOMhandler.clearTodoDOM();
+    }
+    DOMhandler.addTodoDOM(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
+        currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr);
+    addInputListeners();
+    todoID++;
 }
 
 function addListeners() {
     document.querySelector('.add-todo').addEventListener('click', () => {
-        const todo = todoCreation.addTodo();
-        currentProject.todoList.push(todo)
-        if (document.querySelector('.todo-container')) {
-            DOMhandler.clearTodoDOM();
-        }
-        DOMhandler.addTodoDOM(todo.title, todo.desc, todo.dueDate, todo.priority, todo.notes, todo.checkboxArr);
-        addInputListeners();
+        todoInit();
     });
 
     document.querySelector('.project-title').addEventListener('change', () => {
         currentProject.title = document.querySelector('.project-title').value;
     })
 }
-
-addListeners();

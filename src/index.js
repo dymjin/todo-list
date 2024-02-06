@@ -2,73 +2,61 @@ import * as DOMhandler from './DOMhandler.js';
 import * as todoCreation from './todoCreation.js';
 import * as projectCreation from './projectCreation.js';
 
-
 let currentProject, currentTodo, todoID = 1, projectID = 1;
-initProject();
-addListeners();
-
-function initProject() {
-    currentProject = projectCreation.addProject();
-    projectCreation.projectList.push(currentProject);
-    currentProject.id = projectID;
-
+if (!JSON.parse(localStorage.getItem('projectList'))) {
+    initProject();
+} else {
+    const projectTitle = JSON.parse(localStorage.getItem('currentProject')).title;
     if (document.querySelector('.project-container')) {
         DOMhandler.clearProjectDOM();
+        DOMhandler.clearProjectTabDOM();
     }
-    DOMhandler.addProjectDOM();
+    initProject(projectTitle);
+}
 
-    const project = DOMhandler.addElement('project', 'test', document.querySelector('.projectlist-container'));
-    const rmvBtn = DOMhandler.addElement('remove', 'remove', project, 'button');
-    rmvBtn.addEventListener('click', () => {
-        document.querySelector('.projectlist-container').removeChild(project);
-        const projectList = projectCreation.projectList;
-        projectList.splice(projectList.findIndex(({ id }) => id === project.getAttribute('data') - 1), 1);
-    });
-
-    project.setAttribute('data', currentProject.id);
-    project.addEventListener('click', () => {
-        console.log(project.getAttribute('data'))
-    })
+function addNewProject() {
+    let newProject = projectCreation.addProject();
+    newProject.id = projectID;
+    projectCreation.projectList.push(newProject);
+    currentProject = newProject;
+    const projectTab = DOMhandler.addProjectTabs('', newProject.id);
     projectID++;
-    return currentProject;
+    localStorage.setItem('projectList', JSON.stringify(projectCreation.projectList));
+    return projectTab;
+}
+
+function initProject(title) {
+    let projectTab;
+    let storedProjectList = JSON.parse(localStorage.getItem('projectList'));
+    if (document.querySelector('.project-container')) {
+        DOMhandler.clearProjectDOM();
+        DOMhandler.clearProjectTabDOM();
+    };
+    DOMhandler.addProjectDOM();
+    if (storedProjectList) {
+        currentProject = JSON.parse(localStorage.getItem('currentProject'));
+        storedProjectList.forEach(project => {
+            //copy provided project list to global projectList
+            project.id = projectID;
+            projectCreation.projectList.push(project);
+            //project tab functionality
+            let tab = DOMhandler.addProjectTabs(project.title, project.id);
+            addListeners(tab);
+            projectID++;
+        });
+    }
+    else {
+        projectTab = addNewProject();
+        addListeners(projectTab);
+    }
+    localStorage.setItem('projectList', JSON.stringify(projectCreation.projectList));
+    localStorage.setItem('currentProject', JSON.stringify(currentProject));
 }
 
 document.querySelector('.add-project').addEventListener('click', () => {
-    initProject();
-    addListeners();
+    const projectTab = addNewProject();
+    addListeners(projectTab);
 });
-
-// const btn = document.createElement('button');
-// btn.textContent = 'write';
-// btn.addEventListener('click', () => {
-//     DOMhandler.clearProjectDOM();
-//     DOMhandler.addProjectDOM();
-//     addListeners();
-// });
-// document.body.appendChild(btn);
-
-// function clearProjectObj() {
-//     while (projectCreation.projectList.length > 0) {
-//         projectCreation.projectList.pop();
-//     }
-// }
-
-// let copy;
-// const restoreBtn = document.createElement('button');
-// restoreBtn.textContent = 'read';
-// restoreBtn.addEventListener('click', () => {
-//     copy = projectCreation.projectList;
-//     const restoredProject = projectCreation.addProject(copy[0].title, copy[0].todoList);
-//     clearProjectObj();
-//     DOMhandler.clearProjectDOM();
-//     DOMhandler.addProjectDOM(restoredProject.title);
-//     addListeners();
-//     restoredProject.todoList.forEach(item => {
-//         DOMhandler.addTodoDOM(item.title, item.desc, item.dueDate, item.priority, item.notes, item.checkboxArr);
-//     })
-//     console.log(restoredProject)
-// })
-// document.body.appendChild(restoreBtn);
 
 function addInputListeners() {
     let checkboxIndex = 0;
@@ -82,7 +70,6 @@ function addInputListeners() {
             currentProject.todoList[todoIndex - 1].dueDate = todoChildren[2].value;
             currentProject.todoList[todoIndex - 1].priority = todoChildren[3].value;
             currentProject.todoList[todoIndex - 1].notes = todoChildren[4].value;
-            console.log(currentProject.todoList)
         })
     }
     todoContainer.childNodes[5].addEventListener('click', () => {
@@ -121,12 +108,17 @@ function todoInit() {
     todoID++;
 }
 
-function addListeners() {
+function addListeners(tab) {
     document.querySelector('.add-todo').addEventListener('click', () => {
         todoInit();
     });
-
-    document.querySelector('.project-title').addEventListener('change', () => {
-        currentProject.title = document.querySelector('.project-title').value;
+    tab[1].addEventListener('click', () => {
+        currentProject = projectCreation.projectList[tab[0].getAttribute('data') - 1];
+        localStorage.setItem('currentProject', JSON.stringify(currentProject));
+    })
+    tab[1].addEventListener('change', () => {
+        currentProject.title = tab[1].value;
+        localStorage.setItem('projectList', JSON.stringify(projectCreation.projectList));
+        localStorage.setItem('currentProject', JSON.stringify(currentProject));
     })
 }

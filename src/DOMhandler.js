@@ -1,20 +1,15 @@
 import styles from './style.css';
 
-const init = (() => {
-    let i = 0;
-    const add = () => { i++; };
-    const get = () => { return i };
-    const set = (newVal) => { i = newVal }
-    return { add, get, set };
-})();
-
-addElement('add-project', 'new project',
-    document.querySelector('.projectlist-container'),
-    'button');
-
 function clearProjectDOM() {
     const pageContainer = document.querySelector('.page-container');
     pageContainer.removeChild(document.querySelector('.project-container'));
+}
+
+function clearProjectTabDOM() {
+    const projectListContainer = document.querySelector('.projectlist-container');
+    while (projectListContainer.firstChild) {
+        projectListContainer.removeChild(projectListContainer.firstChild)
+    }
 }
 
 function clearTodoDOM() {
@@ -85,6 +80,16 @@ function addChecklist(parent, checkboxArr) {
     }
 }
 
+function addProjectTabs(text, id) {
+    const projectTab = addElement('project', '', document.querySelector('.projectlist-container'));
+    const projectTabTitle = addInput('project-tab-title', text, projectTab, 'My project')
+    const removeProjectTab = addElement('remove-project-tab', 'remove', projectTab, 'button');
+    [projectTab, projectTabTitle, removeProjectTab].forEach(elem => {
+        elem.setAttribute('data', id);
+    })
+    return [projectTab, projectTabTitle, removeProjectTab];
+}
+
 function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
     notes = notes || 'lol';
     const todoContainer = addElement('todo-container', '', document.querySelector('.project-container'));
@@ -103,15 +108,9 @@ function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
     }
 }
 
-function addProjectDOM(title) {
-    title = title || '';
+function addProjectDOM() {
     const projectContainer = addElement('project-container', '', document.querySelector('.page-container'));
-    const projectTitle = addInput('project-title', title, projectContainer, 'Project Title');
     addElement('add-todo', 'add todo', projectContainer, 'button', false);
-    // const project = addElement('project', 'test', document.querySelector('.projectlist-container'));
-    // return project;
-
 }
-// addProjectDOM();
 
-export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, addElement };
+export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, addElement, clearProjectTabDOM, addProjectTabs };

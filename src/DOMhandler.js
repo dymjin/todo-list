@@ -75,7 +75,7 @@ function addChecklist(parent, checkboxArr) {
             const label = addElement('checklist-item-container', '', parent, 'label');
             const checkbox = addInput('checklist-item', '', label, '', 'checkbox');
             checkbox.checked = item.state;
-            addInput('checklist-item-title', item.title, label, '');
+            addInput('checklist-item-title', item.title, label, 'item name');
         });
     }
 }

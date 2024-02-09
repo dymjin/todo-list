@@ -64,19 +64,18 @@ function addSelect(name, parent, priority) {
     return select;
 }
 
-function addChecklist(parent, checkboxArr) {
-    if (!checkboxArr) {
+function addChecklist(parent, checkbox) {
+    if (!checkbox) {
         const label = addElement('', '', parent, 'label');
         addInput('checklist-item', '', label, '', 'checkbox');
         addInput('checklist-item-name', '', label, 'item name');
         return label;
     } else {
-        checkboxArr.forEach(item => {
-            const label = addElement('checklist-item-container', '', parent, 'label');
-            const checkbox = addInput('checklist-item', '', label, '', 'checkbox');
-            checkbox.checked = item.state;
-            addInput('checklist-item-title', item.title, label, 'item name');
-        });
+        const label = addElement('checklist-item-container', '', parent, 'label');
+        const checkboxInput = addInput('checklist-item', '', label, '', 'checkbox');
+        checkboxInput.checked = checkbox.state;
+        addInput('checklist-item-title', checkbox.title, label, 'item name');
+        return label;
     }
 }
 
@@ -93,19 +92,17 @@ function addProjectTabs(text, id) {
 function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
     notes = notes || 'lol';
     const todoContainer = addElement('todo-container', '', document.querySelector('.project-container'));
-    addInput('todo-title', title, todoContainer, 'Title');
-    addInput('todo-desc', desc, todoContainer, 'Description');
-    addInput('due-date', dueDate, todoContainer, '', 'date');
-    const select = addSelect('todo-select', todoContainer, priority);
+    const todoTitle = addInput('todo-title', title, todoContainer, 'Title');
+    const todoDesc = addInput('todo-desc', desc, todoContainer, 'Description');
+    const todoDueDate = addInput('due-date', dueDate, todoContainer, '', 'date');
+    const todoSelect = addSelect('todo-select', todoContainer, priority);
     if (priority) {
-        select.value = priority;
+        todoSelect.value = priority;
     }
-    addElement('todo-notes', notes, todoContainer);
-    addElement('add-checklist', 'add checklist', todoContainer, 'button');
+    const todoNotes = addElement('todo-notes', notes, todoContainer);
+    const addChecklistBtn = addElement('add-checklist', 'add checklist', todoContainer, 'button');
     const checklistContainer = addElement('checklist-container', '', todoContainer);
-    if (checkboxArr) {
-        addChecklist(checklistContainer, checkboxArr);
-    }
+    return [todoTitle, todoDesc, todoDueDate, todoSelect, todoNotes, addChecklistBtn]
 }
 
 function addProjectDOM() {

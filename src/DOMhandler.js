@@ -107,7 +107,6 @@ function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
 
 function addProjectDOM() {
     const projectContainer = addElement('project-container', '', document.querySelector('.page-container'));
-    addElement('add-todo', 'add todo', projectContainer, 'button', false);
 }
 
 export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, addElement, clearProjectTabDOM, addProjectTabs };

@@ -3,9 +3,9 @@ import * as projectCreation from './projectCreation.js';
 import * as DOMhandler from './DOMhandler.js';
 // import * as index from './index.js';
 
-let currentProject, projectList, currentTodo, todoID = 1, checkboxIndex = 1;
+let currentTodo, todoID = 1, checkboxIndex = 1;
 
-function addTodo(title, desc, dueDate, priority, notes, checkboxArr, status, id) {
+function addTodo(title, desc, dueDate, priority, notes, checkboxArr, status, id = 1) {
     title = title || '';
     desc = desc || '';
     dueDate = dueDate || format(new Date(), "dd-MM-yyyy");
@@ -13,8 +13,15 @@ function addTodo(title, desc, dueDate, priority, notes, checkboxArr, status, id)
     notes = notes || '';
     checkboxArr = checkboxArr || [];
     status = status || 'pending';
-    id = todoID;
-    todoID++
+
+    let currProject = projectCreation.currentProject;
+    if (currProject && currProject.todoList.length > 0) {
+        id = 1;
+        let sortedArr = currProject.todoList.sort((a, b) => a.id - b.id)
+        id = (sortedArr[sortedArr.length - 1].id + 1);
+    }
+    console.log(id);
+
     return { title, desc, dueDate, priority, notes, checkboxArr, status, id };
 }
 
@@ -22,66 +29,63 @@ function setupNewTodo() {
     if (document.querySelector('.todo-container')) {
         DOMhandler.clearTodoDOM();
     }
-    currentProject = JSON.parse(localStorage.getItem('current_project'));
-    projectList = JSON.parse(localStorage.getItem('project_list'));
     let newTodo = addTodo();
-    projectList[currentProject.id - 1].todoList.push(newTodo);
-    currentProject.todoList.push(newTodo);
+    projectCreation.projectList[projectCreation.currentProject.id - 1].todoList.push(newTodo);
     currentTodo = newTodo;
-    localStorage.setItem('project_list', JSON.stringify(projectList));
-    localStorage.setItem('current_project', JSON.stringify(currentProject));
+    localStorage.setItem('project_list', JSON.stringify(projectCreation.projectList));
+    localStorage.setItem('current_project', JSON.stringify(projectCreation.projectList[projectCreation.currentProject.id - 1]));
     localStorage.setItem('current_todo', JSON.stringify(currentTodo));
     const todoDOM = DOMhandler.addTodoDOM();
     addInputListeners(todoDOM);
 }
 
-function setupExistingTodos(list) {
+function setupExistingTodos() {
     if (document.querySelector('.todo-container')) {
         DOMhandler.clearTodoDOM();
     }
-    let currentTodo = JSON.parse(localStorage.getItem('current_todo'));
-    currentTodo = list[currentTodo.id - 1];
+    currentTodo = JSON.parse(localStorage.getItem('current_todo'));
     const todoDOM = DOMhandler.addTodoDOM(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
         currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr);
     addInputListeners(todoDOM);
-    todoID = currentTodo.id;
+}
+
+function setStorage(projectList, currentProject) {
+    localStorage.setItem('project_list', JSON.stringify(projectList));
+    localStorage.setItem('current_project', JSON.stringify(projectList[currentProject.id - 1]));
+    localStorage.setItem('current_todo', JSON.stringify(projectList[currentProject.id - 1].todoList[currentTodo.id - 1]));
 }
 
 function addInputListeners(inputList) {
-    let currentProject = JSON.parse(localStorage.getItem('current_project'));
-    let projectList = JSON.parse(localStorage.getItem('project_list'));
-    let currentTodo = JSON.parse(localStorage.getItem('current_todo'));
-    let storageItems = [projectList, currentProject, currentTodo];
-    let projects = [currentProject.todoList[currentTodo.id - 1],
-    projectList[currentProject.id - 1].todoList[currentTodo.id - 1],
-        currentTodo];
+    let pList = projectCreation.projectList;
+    let currProject = projectCreation.currentProject;
+    // console.log(currProject.todoList[currentTodo.id - 1])
+    // console.log(pList[currProject.id - 1].todoList[0])
+    // console.log(pList[currProject.id - 1].todoList[currentTodo.id - 1])
+    let pListCurrTodo = pList[currProject.id - 1].todoList[currentTodo.id - 1];
     for (let i = 0; i < 5; i++) {
         inputList[i].addEventListener('input', () => {
-            projects.forEach(item => {
-                item.title = inputList[0].value;
-                item.desc = inputList[1].value;
-                item.dueDate = inputList[2].value;
-                item.priority = inputList[3].value;
-                item.notes = inputList[4].value;
-            })
-            localStorage.setItem('project_list', JSON.stringify(projectList));
-            localStorage.setItem('current_project', JSON.stringify(currentProject));
-            localStorage.setItem('current_todo', JSON.stringify(currentTodo));
+            pListCurrTodo.title = inputList[0].value;
+            pListCurrTodo.desc = inputList[1].value;
+            pListCurrTodo.dueDate = inputList[2].value;
+            pListCurrTodo.priority = inputList[3].value;
+            pListCurrTodo.notes = inputList[4].value;
+            setStorage(pList, currProject);
         })
     }
     if (currentTodo.checkboxArr.length) {
-        setupExistingChecklist(projects, storageItems, currentTodo.checkboxArr);
+        setupExistingChecklist(pListCurrTodo, currentTodo.checkboxArr);
     }
     inputList[5].addEventListener('click', () => {
-        setupNewChecklist(projects, storageItems);
+        setupNewChecklist(pListCurrTodo);
     });
 }
 
-function setupExistingChecklist(projectsArr, storageItemsArr, currentCheckboxArr) {
+function setupExistingChecklist(projectListCurrentTodo, currentCheckboxArr) {
     const checklistContainer = document.querySelector('.checklist-container');
     while (checklistContainer.firstChild) {
         checklistContainer.removeChild(checklistContainer.firstChild)
     }
+    console.log(projectListCurrentTodo)
     currentCheckboxArr.forEach(checkbox => {
         const label = DOMhandler.addChecklist(checklistContainer, checkbox);
         const labelChildren = label.childNodes;
@@ -89,44 +93,36 @@ function setupExistingChecklist(projectsArr, storageItemsArr, currentCheckboxArr
         for (let i = 0; i < 2; i++) {
             labelChildren[i].setAttribute('data', checkbox.id);
         }
-        addChecklistListeners(projectsArr, storageItemsArr, labelChildren);
+        addChecklistListeners(projectListCurrentTodo, labelChildren);
         checkboxIndex++;
     })
 }
 
-function setupNewChecklist(projectsArr, storageItemsArr) {
+function setupNewChecklist(projectListCurrentTodo) {
     const checklistContainer = document.querySelector('.checklist-container');
     const label = DOMhandler.addChecklist(checklistContainer);
     const labelChildren = label.childNodes;
     for (let i = 0; i < 2; i++) {
         labelChildren[i].setAttribute('data', checkboxIndex);
     }
-    projectsArr.forEach(item => {
-        item.checkboxArr
-            .push({ title: label.children[1].value, state: label.children[0].checked, id: checkboxIndex });
-        localStorage.setItem('project_list', JSON.stringify(storageItemsArr[0]));
-        localStorage.setItem('current_project', JSON.stringify(storageItemsArr[1]));
-        localStorage.setItem('current_todo', JSON.stringify(storageItemsArr[2]));
-    });
-    addChecklistListeners(projectsArr, storageItemsArr, labelChildren);
+    projectListCurrentTodo.checkboxArr
+        .push({ title: label.children[1].value, state: label.children[0].checked, id: checkboxIndex });
+    setStorage(projectCreation.projectList, projectCreation.currentProject);
+    addChecklistListeners(projectListCurrentTodo, labelChildren);
     checkboxIndex++;
 }
 
-function addChecklistListeners(projectsArr, storageItemsArr, labelChildren) {
-    projectsArr.forEach(item => {
-        for (let i = 0; i < 2; i++) {
-            labelChildren[i].addEventListener('input', () => {
-                item.checkboxArr[labelChildren[0]
-                    .getAttribute('data') - 1].state = labelChildren[0].checked;
-                item.checkboxArr[labelChildren[1]
-                    .getAttribute('data') - 1].title = labelChildren[1].value;
-                localStorage.setItem('project_list', JSON.stringify(storageItemsArr[0]));
-                localStorage.setItem('current_project', JSON.stringify(storageItemsArr[1]));
-                localStorage.setItem('current_todo', JSON.stringify(storageItemsArr[2]));
-            })
-        }
-    })
+function addChecklistListeners(projectListCurrentTodo, labelChildren) {
+    for (let i = 0; i < 2; i++) {
+        labelChildren[i].addEventListener('input', () => {
+            projectListCurrentTodo.checkboxArr[labelChildren[0]
+                .getAttribute('data') - 1].state = labelChildren[0].checked;
+            projectListCurrentTodo.checkboxArr[labelChildren[1]
+                .getAttribute('data') - 1].title = labelChildren[1].value;
+            setStorage(projectCreation.projectList, projectCreation.currentProject)
+        })
+    }
 }
 
 
-export { addTodo, setupExistingTodos, setupNewTodo };
+export { addTodo, setupExistingTodos, setupNewTodo, currentTodo };

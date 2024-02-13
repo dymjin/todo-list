@@ -1,9 +1,8 @@
 import { format } from "date-fns";
 import * as projectCreation from './projectCreation.js';
 import * as DOMhandler from './DOMhandler.js';
-// import * as index from './index.js';
 
-let currentTodo, todoID = 1, checkboxIndex = 1;
+let currentTodo, checkboxIndex = 1;
 
 function addTodo(title, desc, dueDate, priority, notes, checkboxArr, status, id = 1) {
     title = title || '';
@@ -16,11 +15,10 @@ function addTodo(title, desc, dueDate, priority, notes, checkboxArr, status, id 
 
     let currProject = projectCreation.currentProject;
     if (currProject && currProject.todoList.length > 0) {
-        id = 1;
+        //find element with highest id, then add 1 for new id
         let sortedArr = currProject.todoList.sort((a, b) => a.id - b.id)
         id = (sortedArr[sortedArr.length - 1].id + 1);
     }
-    console.log(id);
 
     return { title, desc, dueDate, priority, notes, checkboxArr, status, id };
 }
@@ -30,11 +28,10 @@ function setupNewTodo() {
         DOMhandler.clearTodoDOM();
     }
     let newTodo = addTodo();
+    // add new todo to global projectList
     projectCreation.projectList[projectCreation.currentProject.id - 1].todoList.push(newTodo);
     currentTodo = newTodo;
-    localStorage.setItem('project_list', JSON.stringify(projectCreation.projectList));
-    localStorage.setItem('current_project', JSON.stringify(projectCreation.projectList[projectCreation.currentProject.id - 1]));
-    localStorage.setItem('current_todo', JSON.stringify(currentTodo));
+    setStorage(projectCreation.projectList, projectCreation.currentProject);
     const todoDOM = DOMhandler.addTodoDOM();
     addInputListeners(todoDOM);
 }
@@ -58,12 +55,10 @@ function setStorage(projectList, currentProject) {
 function addInputListeners(inputList) {
     let pList = projectCreation.projectList;
     let currProject = projectCreation.currentProject;
-    // console.log(currProject.todoList[currentTodo.id - 1])
-    // console.log(pList[currProject.id - 1].todoList[0])
-    // console.log(pList[currProject.id - 1].todoList[currentTodo.id - 1])
     let pListCurrTodo = pList[currProject.id - 1].todoList[currentTodo.id - 1];
     for (let i = 0; i < 5; i++) {
         inputList[i].addEventListener('input', () => {
+            //add input event listener for all todoDOM elements
             pListCurrTodo.title = inputList[0].value;
             pListCurrTodo.desc = inputList[1].value;
             pListCurrTodo.dueDate = inputList[2].value;
@@ -72,9 +67,11 @@ function addInputListeners(inputList) {
             setStorage(pList, currProject);
         })
     }
+    //if checkboxArr exists, setup checklist with values of checkboxArr
     if (currentTodo.checkboxArr.length) {
         setupExistingChecklist(pListCurrTodo, currentTodo.checkboxArr);
     }
+
     inputList[5].addEventListener('click', () => {
         setupNewChecklist(pListCurrTodo);
     });
@@ -82,10 +79,10 @@ function addInputListeners(inputList) {
 
 function setupExistingChecklist(projectListCurrentTodo, currentCheckboxArr) {
     const checklistContainer = document.querySelector('.checklist-container');
+    //clear checklistDOM if it exists
     while (checklistContainer.firstChild) {
         checklistContainer.removeChild(checklistContainer.firstChild)
     }
-    console.log(projectListCurrentTodo)
     currentCheckboxArr.forEach(checkbox => {
         const label = DOMhandler.addChecklist(checklistContainer, checkbox);
         const labelChildren = label.childNodes;
@@ -105,6 +102,7 @@ function setupNewChecklist(projectListCurrentTodo) {
     for (let i = 0; i < 2; i++) {
         labelChildren[i].setAttribute('data', checkboxIndex);
     }
+    //add checkbox obj to the currentTodo's checkboxArr
     projectListCurrentTodo.checkboxArr
         .push({ title: label.children[1].value, state: label.children[0].checked, id: checkboxIndex });
     setStorage(projectCreation.projectList, projectCreation.currentProject);
@@ -115,14 +113,15 @@ function setupNewChecklist(projectListCurrentTodo) {
 function addChecklistListeners(projectListCurrentTodo, labelChildren) {
     for (let i = 0; i < 2; i++) {
         labelChildren[i].addEventListener('input', () => {
+            //checkbox input element
             projectListCurrentTodo.checkboxArr[labelChildren[0]
                 .getAttribute('data') - 1].state = labelChildren[0].checked;
+            //text input element
             projectListCurrentTodo.checkboxArr[labelChildren[1]
                 .getAttribute('data') - 1].title = labelChildren[1].value;
             setStorage(projectCreation.projectList, projectCreation.currentProject)
         })
     }
 }
-
 
 export { addTodo, setupExistingTodos, setupNewTodo, currentTodo };

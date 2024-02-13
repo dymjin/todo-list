@@ -1,4 +1,5 @@
 import styles from './style.css';
+import { format } from "date-fns";
 
 function clearProjectDOM() {
     const pageContainer = document.querySelector('.page-container');
@@ -20,10 +21,8 @@ function clearTodoDOM() {
 function addElement(name, text, parent, type) {
     type = type || 'div';
     const elem = document.createElement(type);
-    if (name) { elem.className = name }
-    else { name = '' };
-    if (text) { elem.textContent = text }
-    else { text = '' };
+    name ? elem.className = name : name = '';
+    text ? elem.textContent = text : text = '';
     parent.appendChild(elem);
     return elem;
 }
@@ -32,10 +31,8 @@ function addInput(name, text, parent, placeholder, type) {
     type = type || 'text';
     const input = document.createElement('input');
     input.setAttribute('type', type);
-    if (placeholder) { input.setAttribute('placeholder', placeholder) }
-    else { placeholder = '' };
-    if (text) { input.value = text }
-    else { text = '' };
+    placeholder ? input.setAttribute('placeholder', placeholder) : placeholder = '';
+    text ? input.value = text : text = '';
     input.className = name;
     parent.appendChild(input);
     return input;
@@ -51,8 +48,7 @@ function addSelect(name, parent, priority) {
     addElement('option', 'Low', select, 'option');
     addElement('option', 'Medium', select, 'option');
     addElement('option', 'High', select, 'option');
-    if (priority === '') {
-    } else {
+    if (priority !== '') {
         //answer by Sébastien: https://stackoverflow.com/questions/19611557/how-to-set-default-value-for-html-select
         for (let options, index = 0; options = select.options[index]; index++) {
             if (options.value === priority) {
@@ -83,30 +79,44 @@ function addProjectTabs(text, id) {
     const projectTab = addElement('project', '', document.querySelector('.projectlist-container'));
     const projectTabTitle = addInput('project-tab-title', text, projectTab, 'My project')
     const removeProjectTab = addElement('remove-project-tab', 'remove', projectTab, 'button');
-    [projectTab, projectTabTitle, removeProjectTab].forEach(elem => {
+    const elements = [projectTab, projectTabTitle, removeProjectTab];
+    elements.forEach(elem => {
         elem.setAttribute('data', id);
     })
-    return [projectTab, projectTabTitle, removeProjectTab];
+    return elements;
+}
+
+function addTodoCards(text, dueDate, id) {
+    const todoCard = addElement('todo', '', document.querySelector(`.project[data="${id}"]`));
+    const todoTabTitle = addElement('todo-card-title', text, todoCard);
+    const removeTodoTab = addElement('remove-todo-card', 'remove', todoCard, 'button');
+    const elements = [todoCard, todoTabTitle, removeTodoTab];
+    if (dueDate !== format(new Date(), "dd-MM-yyyy")) {
+        const todoDueDate = addElement('todo-card-duedate', dueDate, todoCard);
+        elements.push(todoDueDate);
+    }
+    elements.forEach(elem => {
+        elem.setAttribute('data', id);
+    })
+    return elements;
 }
 
 function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
-    notes = notes || 'lol';
+    notes = notes || '';
     const todoContainer = addElement('todo-container', '', document.querySelector('.project-container'));
     const todoTitle = addInput('todo-title', title, todoContainer, 'Title');
     const todoDesc = addInput('todo-desc', desc, todoContainer, 'Description');
     const todoDueDate = addInput('due-date', dueDate, todoContainer, '', 'date');
     const todoSelect = addSelect('todo-select', todoContainer, priority);
-    if (priority) {
-        todoSelect.value = priority;
-    }
-    const todoNotes = addElement('todo-notes', notes, todoContainer);
+    const todoNotes = addElement('todo-notes', notes, todoContainer, 'textarea');
+    todoNotes.setAttribute('placeholder', 'Add note')
     const addChecklistBtn = addElement('add-checklist', 'add checklist', todoContainer, 'button');
-    const checklistContainer = addElement('checklist-container', '', todoContainer);
+    addElement('checklist-container', '', todoContainer);
     return [todoTitle, todoDesc, todoDueDate, todoSelect, todoNotes, addChecklistBtn]
 }
 
 function addProjectDOM() {
-    const projectContainer = addElement('project-container', '', document.querySelector('.page-container'));
+    addElement('project-container', '', document.querySelector('.page-container'));
 }
 
-export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, addElement, clearProjectTabDOM, addProjectTabs };
+export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, clearProjectTabDOM, addProjectTabs, addTodoCards };

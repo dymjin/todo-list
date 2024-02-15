@@ -33,6 +33,7 @@ function setupNewTodo() {
     currentTodo = newTodo;
     setStorage(projectCreation.projectList, projectCreation.currentProject);
     const todoDOM = DOMhandler.addTodoDOM();
+    DOMhandler.addTodoCards('', '', newTodo.id, '', projectCreation.currentProject.id);
     addInputListeners(todoDOM);
 }
 
@@ -41,6 +42,10 @@ function setupExistingTodos() {
         DOMhandler.clearTodoDOM();
     }
     currentTodo = JSON.parse(localStorage.getItem('current_todo'));
+    let currentProject = JSON.parse(localStorage.getItem('current_project'));
+    currentProject.todoList.forEach(todo => {
+        DOMhandler.addTodoCards(todo.title, todo.dueDate, todo.id, todo.priority, currentProject.id);
+    });
     const todoDOM = DOMhandler.addTodoDOM(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
         currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr);
     addInputListeners(todoDOM);
@@ -58,10 +63,18 @@ function addInputListeners(inputList) {
     let pListCurrTodo = pList[currProject.id - 1].todoList[currentTodo.id - 1];
     for (let i = 0; i < 5; i++) {
         inputList[i].addEventListener('input', () => {
+            //change todoCardDOM
+            if (inputList[0].value !== '') {
+                document.querySelector(`.todo-card-title[data="${currProject.id}-${pListCurrTodo.id}"]`).textContent = inputList[0].value;
+            }
+            if (inputList[2].value !== '') {
+                document.querySelector(`.todo-card-duedate[data="${currProject.id}-${pListCurrTodo.id}"]`)
+                    .textContent = format(new Date(inputList[2].value), "dd-MM-yyyy");
+                pListCurrTodo.dueDate = format(new Date(inputList[2].value), "dd-MM-yyyy");
+            }
             //add input event listener for all todoDOM elements
             pListCurrTodo.title = inputList[0].value;
             pListCurrTodo.desc = inputList[1].value;
-            pListCurrTodo.dueDate = inputList[2].value;
             pListCurrTodo.priority = inputList[3].value;
             pListCurrTodo.notes = inputList[4].value;
             setStorage(pList, currProject);

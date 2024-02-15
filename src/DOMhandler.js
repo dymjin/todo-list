@@ -86,17 +86,30 @@ function addProjectTabs(text, id) {
     return elements;
 }
 
-function addTodoCards(text, dueDate, id) {
-    const todoCard = addElement('todo', '', document.querySelector(`.project[data="${id}"]`));
-    const todoTabTitle = addElement('todo-card-title', text, todoCard);
-    const removeTodoTab = addElement('remove-todo-card', 'remove', todoCard, 'button');
-    const elements = [todoCard, todoTabTitle, removeTodoTab];
-    if (dueDate !== format(new Date(), "dd-MM-yyyy")) {
-        const todoDueDate = addElement('todo-card-duedate', dueDate, todoCard);
-        elements.push(todoDueDate);
+function addTodoCards(text, dueDate, todoID, priority = 'Low', projectID) {
+    text = text || 'My todo';
+    priority ? 0 : priority = 'Low';
+    dueDate = dueDate || format(new Date(), "dd-MM-yyyy")
+    let currentProject = JSON.parse(localStorage.getItem('current_project'));
+    const todoCard = addElement('todo', '', document.querySelector(`.project[data="${currentProject.id}"]`));
+    switch (priority) {
+        case 'Low':
+            todoCard.style.backgroundColor = '#85ffc8';
+            break;
+        case 'Medium':
+            todoCard.style.backgroundColor = '#fcbf5d';
+            break;
+        case 'High':
+            todoCard.style.backgroundColor = '#fc5151';
+            break;
     }
+    const todoTabTitle = addElement('todo-card-title', text, todoCard);
+    const todoDueDate = addElement('todo-card-duedate', dueDate, todoCard);
+    const removeTodoTab = addElement('remove-todo-card', 'remove', todoCard, 'button');
+    const elements = [todoCard, todoTabTitle, removeTodoTab, todoDueDate];
+
     elements.forEach(elem => {
-        elem.setAttribute('data', id);
+        elem.setAttribute('data', `${projectID}-${todoID}`);
     })
     return elements;
 }

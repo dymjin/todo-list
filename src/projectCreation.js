@@ -19,10 +19,10 @@ function setupNewProject() {
     let newProject = addProject();
     projectList.push(newProject);
     currentProject = newProject;
-    localStorage.setItem("current_project", JSON.stringify(currentProject));
-    todoCreation.setupNewTodo();
     const projectTab = DOMhandler.addProjectTabs('', newProject.id)[0];
     addTabListeners(projectTab);
+    localStorage.setItem("current_project", JSON.stringify(currentProject));
+    todoCreation.setupNewTodo();
 }
 
 function addTabListeners(tab) {

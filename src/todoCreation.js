@@ -13,7 +13,7 @@ function addTodo(title, desc, dueDate, priority, notes, checkboxArr, status, id 
     checkboxArr = checkboxArr || [];
     status = status || 'pending';
 
-    let currProject = projectCreation.currentProject;
+    let currProject = JSON.parse(localStorage.getItem('current_project'));
     if (currProject && currProject.todoList.length > 0) {
         //find element with highest id, then add 1 for new id
         let sortedArr = currProject.todoList.sort((a, b) => a.id - b.id)
@@ -56,6 +56,44 @@ function setStorage(projectList, currentProject) {
     localStorage.setItem('current_project', JSON.stringify(projectList[currentProject.id - 1]));
     localStorage.setItem('current_todo', JSON.stringify(projectList[currentProject.id - 1].todoList[currentTodo.id - 1]));
 }
+
+// function addRemoveTodoCardListener(todoCard) {
+//     todoCard.addEventListener('click', () => {
+//         const projectContainer = document.querySelector(`.project[data="${projectCreation.currentProject.id}"]`);
+//         const childTodo = projectContainer.childNodes[2];
+//         projectContainer.removeChild(childTodo);
+
+//         projectCreation.currentProject.todoList.splice(currentTodo.id - 1, 1);
+//         projectCreation.currentProject.todoList.forEach((todo, index) => {
+//             todo.id = index + 1;
+//         })
+//         if (!projectCreation.currentProject.todoList.length) {
+//             setupNewTodo();
+//         }
+//         setStorage(projectCreation.projectList, projectCreation.currentProject);
+
+
+
+//         const todoCards = document.querySelectorAll('.todo[data^="1-"]')
+//         todoCards.forEach((card, index) => {
+//             card.setAttribute('data', `${projectCreation.currentProject.id}-${index + 1}`)
+//         })
+//         // childTodo.childNodes.forEach((child, index) => {
+//         //     child.setAttribute('data', `${projectCreation.currentProject.id}-${index + 1}`)
+//         // })
+//         // currentTodo = projectCreation.currentProject.todoList[todoCard.getAttribute('data')[2] - 1];
+//         projectCreation.currentProject.todoList.splice(currentTodo.id - 1, 1);
+//         projectCreation.currentProject.todoList.forEach((todo, index) => {
+//             todo.id = index + 1;
+//         })
+//         setStorage(projectCreation.projectList, projectCreation.currentProject);
+//         if (!projectCreation.currentProject.todoList.length) {
+//             console.log('passed')
+//             setupNewTodo();
+//         }
+//         setStorage(projectCreation.projectList, projectCreation.currentProject);
+//     })
+// }
 
 function addInputListeners(inputList) {
     let pList = projectCreation.projectList;

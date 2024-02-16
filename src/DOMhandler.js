@@ -129,6 +129,9 @@ function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
 }
 
 function addProjectDOM() {
+    // if (document.querySelector('.project-container')) {
+    //     clearProjectDOM();
+    // };
     addElement('project-container', '', document.querySelector('.page-container'));
 }
 

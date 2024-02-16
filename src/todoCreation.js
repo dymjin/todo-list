@@ -1,6 +1,6 @@
 import { format } from "date-fns";
-import * as projectCreation from './projectCreation.js';
-import * as DOMhandler from './DOMhandler.js';
+// import * as projectCreation from './projectCreation.js';
+// import * as DOMhandler from './DOMhandler.js';
 
 let currentTodo, checkboxIndex = 1;
 

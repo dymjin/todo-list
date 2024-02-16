@@ -1,21 +1,32 @@
 import styles from './style.css';
 import { format } from "date-fns";
 
-function clearProjectDOM() {
-    const pageContainer = document.querySelector('.page-container');
-    pageContainer.removeChild(document.querySelector('.project-container'));
-}
-
-function clearProjectTabDOM() {
-    const projectListContainer = document.querySelector('.projectlist-container');
-    while (projectListContainer.firstChild) {
-        projectListContainer.removeChild(projectListContainer.firstChild)
+function clearDOM(element) {
+    const projectContainer = document.querySelector('.project-container');
+    const todoContainer = document.querySelector('.todo-container');
+    if (element === "project") {
+        document.querySelector('.page-container')
+            .removeChild(projectContainer);
+    }
+    if (element === "todo") {
+        projectContainer.removeChild(todoContainer);
     }
 }
 
-function clearTodoDOM() {
-    const projectContainer = document.querySelector('.project-container');
-    projectContainer.removeChild(document.querySelector('.todo-container'));
+function clearTabDOM(tab) {
+    const projectListContainer = document.querySelector('.projectlist-container');
+    let currentProject = JSON.parse(localStorage.getItem('current_project'));
+    const projectWrapper = document.querySelector(`.project[data="${currentProject.id}"]`);
+    if (tab === 'project') {
+        while (projectListContainer.firstChild) {
+            projectListContainer.removeChild(projectListContainer.firstChild)
+        }
+    }
+    if (tab === 'todo') {
+        while (projectWrapper.firstChild) {
+            projectWrapper.removeChild(projectWrapper.firstChild)
+        }
+    }
 }
 
 function addElement(name, text, parent, type) {
@@ -115,7 +126,7 @@ function addTodoCards(text, dueDate, todoID, priority = 'Low', projectID) {
 }
 
 function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
-    notes = notes || '';
+    clearDOM('todo');
     const todoContainer = addElement('todo-container', '', document.querySelector('.project-container'));
     const todoTitle = addInput('todo-title', title, todoContainer, 'Title');
     const todoDesc = addInput('todo-desc', desc, todoContainer, 'Description');
@@ -129,10 +140,8 @@ function addTodoDOM(title, desc, dueDate, priority, notes, checkboxArr) {
 }
 
 function addProjectDOM() {
-    // if (document.querySelector('.project-container')) {
-    //     clearProjectDOM();
-    // };
+    clearDOM('project');
     addElement('project-container', '', document.querySelector('.page-container'));
 }
 
-export { addProjectDOM, addTodoDOM, clearProjectDOM, clearTodoDOM, addChecklist, clearProjectTabDOM, addProjectTabs, addTodoCards };
+export { addProjectDOM, addTodoDOM, clearDOM, clearTabDOM, addChecklist, addProjectTabs, addTodoCards };

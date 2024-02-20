@@ -4,26 +4,20 @@ import * as todoCreation from './todoCreation.js';
 let projectList = [], currentProject;
 
 function addProject(title = '', todoList = [], id = 1) {
-    let project = {};
-
-    project.title = title;
-    project.todoList = todoList;
-    project.id = id;
     const storedProjectList = JSON.parse(localStorage.getItem('project_list'));
     if (storedProjectList) {
         let sortedArr = storedProjectList.sort((a, b) => a.id - b.id);
-        project.id = (sortedArr[sortedArr.length - 1].id + 1);
+        id = (sortedArr[sortedArr.length - 1].id + 1);
     }
-    currentProject = project;
-    projectList.push(project);
-    return project;
+    return { title, todoList, id };
 }
 
 function setupNewProject() {
-    const project = addProject();
+    currentProject = addProject();
+    projectList.push(currentProject);
     localStorage.setItem("project_list", JSON.stringify(projectList));
     localStorage.setItem("current_project", JSON.stringify(currentProject));
-    const projectDOM = DOMhandler.addProjectDOM('', project.id);
+    const projectDOM = DOMhandler.addProjectDOM('', currentProject.id);
     addTabListeners(projectDOM);
     // todoCreation.setupNewTodo();
 }
@@ -42,7 +36,8 @@ function addTabListeners(tab) {
             projectList.forEach((project, index) => {
                 project.id = index + 1;
             })
-            currentProject = projectList[projectList.length - 1];
+            if (projectList[currentProject.id]) { }
+            else { currentProject.id = projectList[projectList.length - 1].id }
             const projectlistContainer = document.querySelector('.projectlist-container');
             projectlistContainer.removeChild(tabContainer);
             projectlistContainer.childNodes.forEach((elem, index) => {
@@ -54,6 +49,7 @@ function addTabListeners(tab) {
         } else {
             projectList.splice(0, 1);
             currentProject = addProject();
+            projectList.push(currentProject)
             currentProject.id = 1;
             document.querySelector('.project-tab-title').value = '';
         }

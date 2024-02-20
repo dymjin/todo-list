@@ -81,10 +81,13 @@ function addCheckbox(parent, checkbox) {
 
 function addTab(name, text, parent, projectID, todoID) {
     const tabContainer = addElement(name, '', parent);
-    const tabtTitle = addInput(`${name}-tab-title`, text, tabContainer, '', 'My project');
+    const tabtTitleWrapper = addElement(`${name}-tab-title-wrapper`, '', tabContainer);
+    const tabtTitle = addInput(`${name}-tab-title`, text, tabtTitleWrapper, '', 'My project');
     tabtTitle.disabled = true;
+    const wrapper = addElement(`${name}-input-wrapper`, '', tabtTitleWrapper);
+    const editTab = addElement(`${name}-edit-tab`, 'edit', tabContainer, 'button')
     const removeTab = addElement(`${name}-remove-tab`, 'remove', tabContainer, 'button');
-    const elements = [tabContainer, tabtTitle, removeTab];
+    const elements = [tabContainer, tabtTitle, editTab, removeTab, wrapper];
     elements.forEach(elem => {
         if (todoID) { elem.setAttribute('data', `${projectID}-${todoID}`); }
         else { elem.setAttribute('data', projectID); }
@@ -122,14 +125,21 @@ function addTodoDOM(title, desc, dueDate, priority, notes, projectID, todoID) {
     todoNotes.placeholder = 'Add note';
     const addChecklistBtn = addElement('add-checklist', 'add checklist', todoContainer, 'button');
     addElement('checklist-container', '', todoContainer);
-    addTodoTab(title, dueDate, priority, projectID, todoID);
-    return [todoTitle, todoDesc, todoDueDate, todoSelect, todoNotes, addChecklistBtn]
+    const todoTab = addTodoTab(title, dueDate, priority, projectID, todoID);
+    return [todoTitle, todoDesc, todoDueDate, todoSelect, todoNotes, addChecklistBtn, todoTab]
 }
 
-function addProjectDOM(text, id) {
+function addProjectDOM(text, id = 1) {
     clearDOM('project');
+    if (document.querySelector('.project-container')) {
+        document.querySelector('.page-container')
+        .removeChild(document.querySelector('.project-container'))
+    };
     addElement('project-container', '', document.querySelector('.page-container'));
-    addTab('project', text, document.querySelector('.projectlist-container'), id);
+    // console.log(id)
+    const projectTab = addTab('project', text, document.querySelector('.projectlist-container'), id);
+
+    return projectTab;
 }
 
 export { addProjectDOM, addTodoDOM, clearDOM, clearTabDOM, addCheckbox };

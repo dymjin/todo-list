@@ -18,16 +18,19 @@ function clearDOM(mode) {
 function clearTabDOM(tab) {
     const projectListContainer = document.querySelector('.projectlist-container');
     let currentProject = JSON.parse(localStorage.getItem('current_project'));
-    const projectWrapper = document.querySelector(`.project[data="${currentProject.id}"]`);
     if (tab === 'project') {
         while (projectListContainer.firstChild) {
-            projectListContainer.removeChild(projectListContainer.firstChild)
+            projectListContainer.removeChild(projectListContainer.firstChild);
         }
     }
     if (tab === 'todo') {
-        while (projectWrapper.firstChild) {
-            projectWrapper.removeChild(projectWrapper.firstChild)
-        }
+        let currentTodo = JSON.parse(localStorage.getItem('current_todo'));
+        const todos = document.querySelectorAll('.todo');
+        todos.forEach(todo => {
+            if (document.querySelector('.todo').parentNode) {
+                document.querySelector('.todo').parentNode.removeChild(document.querySelector('.todo'))
+            }
+        })
     }
 }
 
@@ -39,7 +42,7 @@ function addElement(name = '', text = '', parent, type = 'div') {
     return elem;
 }
 
-function addInput(name = '', text = '', parent, type = 'text', placeholder) {
+function addInput(name = '', text = '', parent, type = 'text', placeholder = '') {
     const input = addElement(name, '', parent, 'input');
     input.type = type;
     input.placeholder = placeholder;
@@ -79,10 +82,10 @@ function addCheckbox(parent, checkbox) {
     return label;
 }
 
-function addTab(name, text, parent, projectID, todoID) {
+function addTab(name, text, parent, projectID, todoID, placeholder) {
     const tabContainer = addElement(name, '', parent);
     const tabtTitleWrapper = addElement(`${name}-tab-title-wrapper`, '', tabContainer);
-    const tabtTitle = addInput(`${name}-tab-title`, text, tabtTitleWrapper, '', 'My project');
+    const tabtTitle = addInput(`${name}-tab-title`, text, tabtTitleWrapper, '', placeholder);
     tabtTitle.disabled = true;
     const wrapper = addElement(`${name}-input-wrapper`, '', tabtTitleWrapper);
     const editTab = addElement(`${name}-edit-tab`, 'edit', tabContainer, 'button')
@@ -96,7 +99,7 @@ function addTab(name, text, parent, projectID, todoID) {
 }
 
 function addTodoTab(text = 'My todo', dueDate = format(new Date(), "dd-MM-yyyy"), priority = 'Low', projectID, todoID) {
-    const todoTab = addTab('todo', text, document.querySelector(`.project[data="${projectID}"]`), projectID, todoID);
+    const todoTab = addTab('todo', text, document.querySelector(`.project[data="${projectID}"]`), projectID, todoID, 'My todo');
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab[0]);
     todoTabDueDate.setAttribute('data', `${projectID}-${todoID}`)
     todoTab[0].insertBefore(todoTabDueDate, todoTab[2])
@@ -114,32 +117,33 @@ function addTodoTab(text = 'My todo', dueDate = format(new Date(), "dd-MM-yyyy")
     return todoTab;
 }
 
-function addTodoDOM(title, desc, dueDate, priority, notes, projectID, todoID) {
+function addTodoDOM(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '') {
     clearDOM('todo');
     const todoContainer = addElement('todo-container', '', document.querySelector('.project-container'));
-    const todoTitle = addInput('todo-title', title, todoContainer, 'Title');
-    const todoDesc = addInput('todo-desc', desc, todoContainer, 'Description');
+    const todoTitle = addInput('todo-title', title, todoContainer, '', 'Title');
+    const todoDesc = addInput('todo-desc', desc, todoContainer, '', 'Description');
     const todoDueDate = addInput('due-date', dueDate, todoContainer, 'date');
+    todoDueDate.min = `${new Date().getFullYear()}-01-01`;
+    todoDueDate.max = `${new Date().getFullYear()}-12-31`;
     const todoSelect = addSelect('todo-select', todoContainer, priority);
     const todoNotes = addElement('todo-notes', notes, todoContainer, 'textarea');
     todoNotes.placeholder = 'Add note';
-    const addChecklistBtn = addElement('add-checklist', 'add checklist', todoContainer, 'button');
-    addElement('checklist-container', '', todoContainer);
-    const todoTab = addTodoTab(title, dueDate, priority, projectID, todoID);
-    return [todoTitle, todoDesc, todoDueDate, todoSelect, todoNotes, addChecklistBtn, todoTab]
+    const addCheckboxBtn = addElement('add-checkbox', 'add checkbox', todoContainer, 'button');
+    addElement('checkbox-container', '', todoContainer);
+    return [todoTitle, todoDesc, todoDueDate, todoSelect, todoNotes, addCheckboxBtn];
 }
 
 function addProjectDOM(text, id = 1) {
     clearDOM('project');
     if (document.querySelector('.project-container')) {
         document.querySelector('.page-container')
-        .removeChild(document.querySelector('.project-container'))
+            .removeChild(document.querySelector('.project-container'))
     };
     addElement('project-container', '', document.querySelector('.page-container'));
     // console.log(id)
-    const projectTab = addTab('project', text, document.querySelector('.projectlist-container'), id);
+    const projectTab = addTab('project', text, document.querySelector('.projectlist-container'), id, '', 'My project');
 
     return projectTab;
 }
 
-export { addProjectDOM, addTodoDOM, clearDOM, clearTabDOM, addCheckbox };
+export { addProjectDOM, addTodoDOM, clearDOM, clearTabDOM, addCheckbox, addTab, addTodoTab };

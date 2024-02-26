@@ -64,6 +64,9 @@ function addTabListeners(tab) {
     wrapper.addEventListener('dblclick', () => {
         currentProject = projectList[tabContainer.getAttribute('data') - 1];
         localStorage.setItem('current_project', JSON.stringify(currentProject));
+        DOMhandler.clearTabDOM('todo');
+        todoCreation.setupExistingTodos();
+
         // tabTitle.disabled = false;
         // projectList = JSON.parse(localStorage.getItem('project_list'));
         // currentProject = projectList[tab.getAttribute('data') - 1];
@@ -95,4 +98,4 @@ function setupExistingProjects(list) {
 }
 
 // export { addProject, projectList, currentProject, setupNewProject, setupExistingProjects };
-export { setupNewProject, setupExistingProjects }
+export { setupNewProject, setupExistingProjects, projectList, currentProject }

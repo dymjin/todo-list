@@ -98,8 +98,16 @@ function addTab(name, text, parent, projectID, todoID, placeholder) {
     return elements;
 }
 
+function addProjectTab(text = 'My project', parent, projectID) {
+    const projectTab = addTab('project', text, parent, projectID, '', 'My project');
+    const tabContainer = projectTab[0];
+    const todoContainer = addElement('todo-tab-wrapper', '', tabContainer);
+    todoContainer.setAttribute('data', projectID);
+    return projectTab;
+}
+
 function addTodoTab(text = 'My todo', dueDate = format(new Date(), "dd-MM-yyyy"), priority = 'Low', projectID, todoID) {
-    const todoTab = addTab('todo', text, document.querySelector(`.project[data="${projectID}"]`), projectID, todoID, 'My todo');
+    const todoTab = addTab('todo', text, document.querySelector(`.todo-tab-wrapper[data="${projectID}"]`), projectID, todoID, 'My todo');
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab[0]);
     todoTabDueDate.setAttribute('data', `${projectID}-${todoID}`)
     todoTab[0].insertBefore(todoTabDueDate, todoTab[2])
@@ -141,8 +149,7 @@ function addProjectDOM(text, id = 1) {
     };
     addElement('project-container', '', document.querySelector('.page-container'));
     // console.log(id)
-    const projectTab = addTab('project', text, document.querySelector('.projectlist-container'), id, '', 'My project');
-
+    const projectTab = addProjectTab('project', document.querySelector('.projectlist-container'), id);
     return projectTab;
 }
 

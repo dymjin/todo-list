@@ -24,7 +24,8 @@ function setupNewTodo() {
     setStorage(projectCreation.projectList, projectCreation.currentProject);
 
     const todoDOM = DOMhandler.addTodoDOM();
-    DOMhandler.addTodoTab('', format(new Date(), 'dd-MM-yyyy'), '', projectCreation.currentProject.id, currentTodo.id);
+    const todoTab = DOMhandler.addTodoTab('', format(new Date(), 'dd-MM-yyyy'), '', projectCreation.currentProject.id, currentTodo.id);
+    // addTodoTabListeners(todoTab)
     addInputListeners(todoDOM);
 }
 
@@ -45,41 +46,39 @@ function setStorage(projectList, currentProject) {
     localStorage.setItem('current_todo', JSON.stringify(projectList[currentProject.id - 1].todoList[currentTodo.id - 1]));
 }
 
-// function addRemoveTodoCardListener(todoCard) {
-//     todoCard.addEventListener('click', () => {
-//         const projectContainer = document.querySelector(`.project[data="${projectCreation.currentProject.id}"]`);
-//         const childTodo = projectContainer.childNodes[2];
-//         projectContainer.removeChild(childTodo);
-
-//         projectCreation.currentProject.todoList.splice(currentTodo.id - 1, 1);
-//         projectCreation.currentProject.todoList.forEach((todo, index) => {
-//             todo.id = index + 1;
-//         })
-//         if (!projectCreation.currentProject.todoList.length) {
-//             setupNewTodo();
+// function addTodoTabListeners(tab) {
+//     const removeTab = tab[3];
+//     const editTab = tab[2];
+//     const tabContainer = tab[0];
+//     removeTab.addEventListener('click', () => {
+//         if (projectCreation.currentProject.todoList.length > 1) {
+//             currentTodo = projectCreation.currentProject.todoList[tab[0].getAttribute('data')[2] - 1];
+//             projectCreation.currentProject.todoList.splice(currentTodo.id - 1, 1);
+//             projectCreation.currentProject.todoList.forEach((todo, index) => {
+//                 todo.id = index + 1;
+//             })
+//             if (projectCreation.currentProject.todoList[currentTodo.id]) { }
+//             else { currentTodo.id = projectCreation.currentProject.todoList[projectCreation.currentProject.todoList.length - 1].id }
+//             const project = document.querySelector(`.project[data="${projectCreation.currentProject.id}"]`);
+//             const todo = document.querySelector(`.todo[data="${projectCreation.currentProject.id}-${currentTodo.id}"]`);
+//             project.removeChild(tabContainer);
+//             console.log(todo.parentNode.childNodes[3])
+//             todo.childNodes.forEach((elem, index) => {
+//                 // console.log(elem)
+//                 elem.setAttribute('data', `${projectCreation.currentProject.id}-${index + 1}`);
+//                 // elem.forEach(child => {
+//                     // child.setAttribute('data', `${projectCreation.currentProject.id}-${index + 1}`);
+//                     // console.log(child)
+//                 // })
+//             });
+//         } else {
+//             //         projectList.splice(0, 1);
+//             //         currentProject = addProject();
+//             //         projectList.push(currentProject)
+//             //         currentProject.id = 1;
+//             //         document.querySelector('.project-tab-title').value = '';
 //         }
-//         setStorage(projectCreation.projectList, projectCreation.currentProject);
-
-
-
-//         const todoCards = document.querySelectorAll('.todo[data^="1-"]')
-//         todoCards.forEach((card, index) => {
-//             card.setAttribute('data', `${projectCreation.currentProject.id}-${index + 1}`)
-//         })
-//         // childTodo.childNodes.forEach((child, index) => {
-//         //     child.setAttribute('data', `${projectCreation.currentProject.id}-${index + 1}`)
-//         // })
-//         // currentTodo = projectCreation.currentProject.todoList[todoCard.getAttribute('data')[2] - 1];
-//         projectCreation.currentProject.todoList.splice(currentTodo.id - 1, 1);
-//         projectCreation.currentProject.todoList.forEach((todo, index) => {
-//             todo.id = index + 1;
-//         })
-//         setStorage(projectCreation.projectList, projectCreation.currentProject);
-//         if (!projectCreation.currentProject.todoList.length) {
-//             console.log('passed')
-//             setupNewTodo();
-//         }
-//         setStorage(projectCreation.projectList, projectCreation.currentProject);
+//         setStorage(projectCreation.projectList, projectCreation.currentProject)
 //     })
 // }
 
@@ -87,6 +86,7 @@ function addInputListeners(inputList) {
     let pList = projectCreation.projectList;
     let currProject = projectCreation.currentProject;
     let pListCurrTodo = pList[currProject.id - 1].todoList[currentTodo.id - 1];
+
     for (let i = 0; i < 5; i++) {
         inputList[i].addEventListener('input', () => {
             //change todo tab DOM

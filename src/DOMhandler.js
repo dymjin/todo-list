@@ -149,7 +149,7 @@ function addProjectDOM(text, id = 1) {
     };
     addElement('project-container', '', document.querySelector('.page-container'));
     // console.log(id)
-    const projectTab = addProjectTab('project', document.querySelector('.projectlist-container'), id);
+    const projectTab = addProjectTab(text, document.querySelector('.projectlist-container'), id);
     return projectTab;
 }
 

@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { constructFrom, format } from "date-fns";
 import * as projectCreation from './projectCreation.js';
 import * as DOMhandler from './DOMhandler.js';
 
@@ -6,12 +6,14 @@ let currentTodo, checkboxIndex = 1;
 
 function addTodo(title = '', desc = '', dueDate = format(new Date(), "yyyy-MM-dd"),
     priority = '', notes = '', checkboxArr = [], status = 'pending', id = 1) {
-
+    const currProj = JSON.parse(localStorage.getItem('current_project'));
     // let currProject = JSON.parse(localStorage.getItem('current_project'));
-    if (projectCreation.currentProject.todoList.length) {
+    if (currProj.todoList.length) {
         //find element with highest id, then add 1 for new id
-        let sortedArr = projectCreation.currentProject.todoList.sort((a, b) => a.id - b.id)
-        id = (sortedArr[sortedArr.length - 1].id + 1);
+        let sortedArr = currProj.todoList.sort((a, b) => a.id - b.id)
+        sortedArr.forEach(item =>
+            console.log(item.id))
+        id = (sortedArr.at(-1).id + 1);
     }
     return { title, desc, dueDate, priority, notes, checkboxArr, status, id };
 }
@@ -25,15 +27,16 @@ function setupNewTodo() {
 
     const todoDOM = DOMhandler.addTodoDOM();
     const todoTab = DOMhandler.addTodoTab('', format(new Date(), 'dd-MM-yyyy'), '', projectCreation.currentProject.id, currentTodo.id);
-    // addTodoTabListeners(todoTab)
+    addTodoTabListeners(todoTab)
     addInputListeners(todoDOM);
 }
 
 function setupExistingTodos() {
     DOMhandler.clearDOM('todo');
     currentTodo = JSON.parse(localStorage.getItem('current_todo'));
-    projectCreation.currentProject.todoList.forEach(todo => {
-        DOMhandler.addTodoTab(todo.title, format(new Date(todo.dueDate), 'dd-MM-yyyy'), todo.priority, projectCreation.currentProject.id, todo.id)
+    projectCreation.currentProject.todoList.forEach((todo, index) => {
+        const todoTab = DOMhandler.addTodoTab(todo.title, format(new Date(todo.dueDate), 'dd-MM-yyyy'), todo.priority, projectCreation.currentProject.id, todo.id);
+        addTodoTabListeners(todoTab);
     })
     const todoDOM = DOMhandler.addTodoDOM(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
         currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr);
@@ -46,49 +49,52 @@ function setStorage(projectList, currentProject) {
     localStorage.setItem('current_todo', JSON.stringify(projectList[currentProject.id - 1].todoList[currentTodo.id - 1]));
 }
 
-// function addTodoTabListeners(tab) {
-//     const removeTab = tab[3];
-//     const editTab = tab[2];
-//     const tabContainer = tab[0];
-//     removeTab.addEventListener('click', () => {
-//         if (projectCreation.currentProject.todoList.length > 1) {
-//             currentTodo = projectCreation.currentProject.todoList[tab[0].getAttribute('data')[2] - 1];
-//             projectCreation.currentProject.todoList.splice(currentTodo.id - 1, 1);
-//             projectCreation.currentProject.todoList.forEach((todo, index) => {
-//                 todo.id = index + 1;
-//             })
-//             if (projectCreation.currentProject.todoList[currentTodo.id]) { }
-//             else { currentTodo.id = projectCreation.currentProject.todoList[projectCreation.currentProject.todoList.length - 1].id }
-//             const project = document.querySelector(`.project[data="${projectCreation.currentProject.id}"]`);
-//             const todo = document.querySelector(`.todo[data="${projectCreation.currentProject.id}-${currentTodo.id}"]`);
-//             project.removeChild(tabContainer);
-//             console.log(todo.parentNode.childNodes[3])
-//             todo.childNodes.forEach((elem, index) => {
-//                 // console.log(elem)
-//                 elem.setAttribute('data', `${projectCreation.currentProject.id}-${index + 1}`);
-//                 // elem.forEach(child => {
-//                     // child.setAttribute('data', `${projectCreation.currentProject.id}-${index + 1}`);
-//                     // console.log(child)
-//                 // })
-//             });
-//         } else {
-//             //         projectList.splice(0, 1);
-//             //         currentProject = addProject();
-//             //         projectList.push(currentProject)
-//             //         currentProject.id = 1;
-//             //         document.querySelector('.project-tab-title').value = '';
-//         }
-//         setStorage(projectCreation.projectList, projectCreation.currentProject)
-//     })
-// }
+function addTodoTabListeners(tab) {
+    const removeTab = tab[3];
+    const editTab = tab[2];
+    removeTab.addEventListener('click', () => {
+        const projList = projectCreation.projectList;
+        const currProj = projectCreation.currentProject;
+        if (projList[currProj.id - 1].todoList.length > 1) {
+            projList[currProj.id - 1].todoList.splice(removeTab.getAttribute('data')[2] - 1, 1);
+            projList[currProj.id - 1].todoList.forEach((todo, index) => {
+                todo.id = index + 1;
+            })
+            const todoContainer = document.querySelector(`.todo-tab-wrapper[data="${currProj.id}"]`);
+            todoContainer.removeChild(tab[0]);
+            todoContainer.childNodes.forEach((elem, index) => {
+                elem.setAttribute('data', `${currProj.id}-${index + 1}`);
+                elem.childNodes.forEach(child => {
+                    child.setAttribute('data', `${currProj.id}-${index + 1}`);
+                    elem.childNodes[0].childNodes.forEach(child => {
+                        child.setAttribute('data', `${currProj.id}-${index + 1}`);
+                    })
+                })
+            });
+
+            currentTodo = projList[currProj.id - 1].todoList.at(-1);
+
+        } else {
+            projList[currProj.id - 1].todoList.splice(0, 1);
+            currentTodo = addTodo();
+            currentTodo.id = 1;
+            projList[currProj.id - 1].todoList.push(currentTodo);
+            DOMhandler.clearDOM('todo');
+            const todoDOM = DOMhandler.addTodoDOM();
+            document.querySelector(`.todo-tab-title[data="${currProj.id}-${currentTodo.id}"]`).value = 'My todo';
+            document.querySelector(`.todo-tab-duedate[data="${currProj.id}-${currentTodo.id}"]`).textContent = format(new Date(), "dd-MM-yyyy");
+            addInputListeners(todoDOM);
+        }
+        setStorage(projectCreation.projectList, projectCreation.currentProject)
+    })
+}
 
 function addInputListeners(inputList) {
-    let pList = projectCreation.projectList;
-    let currProject = projectCreation.currentProject;
-    let pListCurrTodo = pList[currProject.id - 1].todoList[currentTodo.id - 1];
-
     for (let i = 0; i < 5; i++) {
         inputList[i].addEventListener('input', () => {
+            let pList = projectCreation.projectList;
+            let currProject = projectCreation.currentProject;
+            let pListCurrTodo = pList[currProject.id - 1].todoList[currentTodo.id - 1];
             //change todo tab DOM
             if (inputList[0].value !== '') {
                 document.querySelector(`.todo-tab-title[data="${currProject.id}-${pListCurrTodo.id}"]`).value = inputList[0].value;

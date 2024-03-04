@@ -1,4 +1,4 @@
-import * as DOMhandler from './DOMhandler.js';
+// import * as DOMhandler from './DOMhandler.js';
 import * as todoCreation from './todoCreation.js';
 import * as projectCreation from './projectCreation.js';
 
@@ -13,7 +13,7 @@ if (storedProjectList) {
 
 document.querySelector('.add-project').addEventListener('click', () => {
     projectCreation.setupNewProject();
-    todoCreation.setupNewTodo();
+    // todoCreation.setupNewTodo();
 });
 document.querySelector('.add-todo').addEventListener('click', () => {
     todoCreation.setupNewTodo();

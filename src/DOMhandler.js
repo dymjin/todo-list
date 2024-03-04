@@ -2,35 +2,24 @@ import styles from './style.css';
 import { format } from "date-fns";
 
 function clearDOM(mode) {
-    const projectContainer = document.querySelector('.project-container');
     const todoContainer = document.querySelector('.todo-container');
-    if (projectContainer && todoContainer) {
-        if (mode === "project") {
-            document.querySelector('.page-container')
-                .removeChild(projectContainer);
-        }
-        if (mode === "todo") {
-            projectContainer.removeChild(todoContainer);
-        }
+    if (mode === "todo" && todoContainer) {
+        todoContainer.parentNode.removeChild(todoContainer);
     }
 }
 
-function clearTabDOM(tab) {
-    const projectListContainer = document.querySelector('.projectlist-container');
-    let currentProject = JSON.parse(localStorage.getItem('current_project'));
-    if (tab === 'project') {
-        while (projectListContainer.firstChild) {
-            projectListContainer.removeChild(projectListContainer.firstChild);
+function clearTabDOM(mode) {
+    const projectTabsContainer = document.querySelector('.project-tabs-container');
+    const inbox = document.querySelector('.inbox');
+    if (mode === 'project') {
+        while (projectTabsContainer.firstChild) {
+            projectTabsContainer.removeChild(projectTabsContainer.firstChild);
         }
     }
-    if (tab === 'todo') {
-        let currentTodo = JSON.parse(localStorage.getItem('current_todo'));
-        const todos = document.querySelectorAll('.todo');
-        todos.forEach(todo => {
-            if (document.querySelector('.todo').parentNode) {
-                document.querySelector('.todo').parentNode.removeChild(document.querySelector('.todo'))
-            }
-        })
+    if (mode === 'todo') {
+        while (inbox.firstChild) {
+            inbox.removeChild(inbox.firstChild);
+        }
     }
 }
 
@@ -50,16 +39,21 @@ function addInput(name = '', text = '', parent, type = 'text', placeholder = '')
     return input;
 }
 
-function addSelect(name = '', parent, priority = '') {
+function addSelect(name = '', parent, defaultOptionText) {
     const select = addElement(name, '', parent, 'select');
-    const defaultOption = addElement('option', 'Set priority', select, 'option');
+    const defaultOption = addElement('option', defaultOptionText, select, 'option');
     defaultOption.disabled = true;
     defaultOption.hidden = true;
     defaultOption.value = '';
+    return select;
+}
+
+function addPrioritySelect(parent, priority = '') {
+    const select = addSelect('todo-select', parent, 'Set priority');
     addElement('option', 'Low', select, 'option');
     addElement('option', 'Medium', select, 'option');
     addElement('option', 'High', select, 'option');
-    if (priority !== '') {
+    if (priority) {
         //answer by Sébastien: https://stackoverflow.com/questions/19611557/how-to-set-default-value-for-html-select
         for (let options, index = 0; options = select.options[index]; index++) {
             if (options.value === priority) {
@@ -82,75 +76,61 @@ function addCheckbox(parent, checkbox) {
     return label;
 }
 
-function addTab(name, text, parent, projectID, todoID, placeholder) {
-    const tabContainer = addElement(name, '', parent);
-    const tabtTitleWrapper = addElement(`${name}-tab-title-wrapper`, '', tabContainer);
-    const tabtTitle = addInput(`${name}-tab-title`, text, tabtTitleWrapper, '', placeholder);
-    tabtTitle.disabled = true;
-    const wrapper = addElement(`${name}-input-wrapper`, '', tabtTitleWrapper);
-    const editTab = addElement(`${name}-edit-tab`, 'edit', tabContainer, 'button')
-    const removeTab = addElement(`${name}-remove-tab`, 'remove', tabContainer, 'button');
-    const elements = [tabContainer, tabtTitle, editTab, removeTab, wrapper];
-    elements.forEach(elem => {
-        if (todoID) { elem.setAttribute('data', `${projectID}-${todoID}`); }
-        else { elem.setAttribute('data', projectID); }
-    });
-    return elements;
+function addTab(name, text, parent, placeholder) {
+    const tabContainer = addElement(`${name}-tab`, '', parent);
+    const tabTitleContainer = addElement(`${name}-tab-title-container`, '', tabContainer);
+    const tabTitleWrapper = addElement(`${name}-tab-title-wrapper`, '', tabTitleContainer);
+    const tabTitle = addInput(`${name}-tab-title`, text, tabTitleContainer, '', placeholder);
+    tabTitle.disabled = true;
+    const editTab = addElement(`${name}-tab-edit`, 'edit', tabContainer, 'button')
+    const removeTab = addElement(`${name}-tab-remove`, 'remove', tabContainer, 'button');
+    return tabContainer;
 }
 
-function addProjectTab(text = 'My project', parent, projectID) {
-    const projectTab = addTab('project', text, parent, projectID, '', 'My project');
-    const tabContainer = projectTab[0];
-    const todoContainer = addElement('todo-tab-wrapper', '', tabContainer);
-    todoContainer.setAttribute('data', projectID);
+function addProjectTab(text = 'My project', projectID = 1) {
+    const projectTab = addTab('project', text, document.querySelector('.project-tabs-container'), 'My project');
+    projectTab.setAttribute('data', projectID);
+    projectTab.id = `todo-dest-${projectID}`;
     return projectTab;
 }
 
-function addTodoTab(text = 'My todo', dueDate = format(new Date(), "dd-MM-yyyy"), priority = 'Low', projectID, todoID) {
-    const todoTab = addTab('todo', text, document.querySelector(`.todo-tab-wrapper[data="${projectID}"]`), projectID, todoID, 'My todo');
-    const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab[0]);
-    todoTabDueDate.setAttribute('data', `${projectID}-${todoID}`)
-    todoTab[0].insertBefore(todoTabDueDate, todoTab[2])
-    switch (priority) {
-        case 'Low':
-            todoTab[0].style.backgroundColor = '#85ffc8';
+function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox'), dueDate = format(new Date(), "dd-MM-yyyy"), priority = '', projectID = 1, todoID = 1) {
+    const todoTabsContainer = addElement('todo-tabs-container', '', parent);
+    const todoTab = addTab('todo', text, todoTabsContainer, 'My todo');
+    todoTab.setAttribute('data', `${projectID}-${todoID}`)
+    const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab);
+    todoTab.draggable = true;
+    todoTab.id = 'todo-src';
+    const editTab = todoTab.childNodes[1];
+    todoTab.insertBefore(todoTabDueDate, editTab)
+    switch (priority.toLowerCase()) {
+        case 'low':
+            todoTab.style.backgroundColor = '#85ffc8';
             break;
-        case 'Medium':
-            todoTab[0].style.backgroundColor = '#fcbf5d';
+        case 'medium':
+            todoTab.style.backgroundColor = '#fcbf5d';
             break;
-        case 'High':
-            todoTab[0].style.backgroundColor = '#fc5151';
+        case 'high':
+            todoTab.style.backgroundColor = '#fc5151';
             break;
     }
     return todoTab;
 }
 
-function addTodoDOM(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '') {
+function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '') {
     clearDOM('todo');
-    const todoContainer = addElement('todo-container', '', document.querySelector('.project-container'));
+    const todoContainer = addElement('todo-container', '', document.querySelector('.inbox'));
     const todoTitle = addInput('todo-title', title, todoContainer, '', 'Title');
     const todoDesc = addInput('todo-desc', desc, todoContainer, '', 'Description');
-    const todoDueDate = addInput('due-date', dueDate, todoContainer, 'date');
-    todoDueDate.min = `${new Date().getFullYear()}-01-01`;
-    todoDueDate.max = `${new Date().getFullYear()}-12-31`;
-    const todoSelect = addSelect('todo-select', todoContainer, priority);
+    const todoDueDate = addInput('todo-due-date', dueDate, todoContainer, 'date');
+    todoDueDate.min = '2024-01-01';
+    todoDueDate.max = '2024-12-31';
+    const todoSelect = addPrioritySelect(todoContainer, priority);
     const todoNotes = addElement('todo-notes', notes, todoContainer, 'textarea');
     todoNotes.placeholder = 'Add note';
     const addCheckboxBtn = addElement('add-checkbox', 'add checkbox', todoContainer, 'button');
     addElement('checkbox-container', '', todoContainer);
-    return [todoTitle, todoDesc, todoDueDate, todoSelect, todoNotes, addCheckboxBtn];
+    return todoContainer;
 }
 
-function addProjectDOM(text, id = 1) {
-    clearDOM('project');
-    if (document.querySelector('.project-container')) {
-        document.querySelector('.page-container')
-            .removeChild(document.querySelector('.project-container'))
-    };
-    addElement('project-container', '', document.querySelector('.page-container'));
-    // console.log(id)
-    const projectTab = addProjectTab(text, document.querySelector('.projectlist-container'), id);
-    return projectTab;
-}
-
-export { addProjectDOM, addTodoDOM, clearDOM, clearTabDOM, addCheckbox, addTab, addTodoTab };
+export { addTodoInputs, addCheckbox, addTodoTab, addProjectTab, clearTabDOM };

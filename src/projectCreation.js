@@ -1,5 +1,5 @@
 import * as DOMhandler from './DOMhandler.js';
-import * as todoCreation from './todoCreation.js';
+// import * as todoCreation from './todoCreation.js';
 
 let projectList = [], currentProject;
 
@@ -13,22 +13,31 @@ function addProject(title = '', todoList = [], id = 1) {
 }
 
 function setupNewProject() {
+    // const project = DOMhandler.addProjectTab();
+    // const todo = DOMhandler.addTodoTab();
+    // todo.addEventListener()
+    // addTabListeners(project)
     currentProject = addProject();
     projectList.push(currentProject);
     localStorage.setItem("project_list", JSON.stringify(projectList));
     localStorage.setItem("current_project", JSON.stringify(currentProject));
-    const projectDOM = DOMhandler.addProjectDOM('', currentProject.id);
-    addTabListeners(projectDOM);
+    const projectTab = DOMhandler.addProjectTab('', currentProject.id);
+    addTabListeners(projectTab);
     // todoCreation.setupNewTodo();
 }
 
+
 function addTabListeners(tab) {
-    //get only the tab title input element
-    const tabContainer = tab[0];
-    const tabTitle = tab[1];
-    const editTab = tab[2];
-    const removeTab = tab[3];
-    const wrapper = tab[4];
+    //https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setData
+    //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
+    // tab[0].addEventListener('dragenter', (ev) => {
+    //     console.log('dragEnter');
+    // })
+    const tabContainer = tab;
+    const titleWrapper = tab.childNodes[0].childNodes[0];
+    const tabTitle = tab.childNodes[0].childNodes[1];
+    const editTab = tab.childNodes[1];
+    const removeTab = tab.childNodes[2];
     removeTab.addEventListener('click', () => {
         if (projectList.length > 1) {
             currentProject = projectList[tabContainer.getAttribute('data') - 1];
@@ -38,9 +47,9 @@ function addTabListeners(tab) {
             })
             if (projectList[currentProject.id]) { }
             else { currentProject.id = projectList[projectList.length - 1].id }
-            const projectlistContainer = document.querySelector('.projectlist-container');
-            projectlistContainer.removeChild(tabContainer);
-            projectlistContainer.childNodes.forEach((elem, index) => {
+            const projectTabsContainer = document.querySelector('.project-tabs-container');
+            projectTabsContainer.removeChild(tabContainer);
+            projectTabsContainer.childNodes.forEach((elem, index) => {
                 elem.setAttribute('data', index + 1);
                 elem.childNodes.forEach(child => {
                     child.setAttribute('data', index + 1);
@@ -61,22 +70,22 @@ function addTabListeners(tab) {
         tabTitle.focus();
     })
     tabTitle.onblur = () => { tabTitle.disabled = true; };
-    wrapper.addEventListener('dblclick', () => {
+    titleWrapper.addEventListener('dblclick', () => {
         currentProject = projectList[tabContainer.getAttribute('data') - 1];
         localStorage.setItem('current_project', JSON.stringify(currentProject));
-        DOMhandler.clearTabDOM('todo');
-        todoCreation.setupExistingTodos();
+        // DOMhandler.clearTabDOM('todo');
+        // todoCreation.setupExistingTodos();
 
         // tabTitle.disabled = false;
         // projectList = JSON.parse(localStorage.getItem('project_list'));
-        // currentProject = projectList[tab.getAttribute('data') - 1];
+        currentProject = projectList[tabContainer.getAttribute('data') - 1];
         // let currentTodo = currentProject.todoList[currentProject.todoList.length - 1]
         // todoCreation.setupExistingTodos(currentProject.todoList);
-        // localStorage.setItem('current_project', JSON.stringify(currentProject));
+        localStorage.setItem('current_project', JSON.stringify(currentProject));
         // localStorage.setItem('current_todo', JSON.stringify(currentTodo));
     })
     tabTitle.addEventListener('input', () => {
-        currentProject = projectList[tab[0].getAttribute('data') - 1];
+        currentProject = projectList[tabContainer.getAttribute('data') - 1];
         currentProject.title = tabTitle.value;
         projectList[currentProject.id - 1].title = tabTitle.value;
         localStorage.setItem('current_project', JSON.stringify(currentProject));
@@ -85,17 +94,18 @@ function addTabListeners(tab) {
 }
 
 function setupExistingProjects(list) {
-    DOMhandler.clearTabDOM('project')
+    DOMhandler.clearTabDOM('project');
     list.forEach(project => {
         //copy provided project list to projectList
         projectList.push(project);
-        const projectDOM = DOMhandler.addProjectDOM(project.title, project.id);
+        const projectTab = DOMhandler.addProjectTab(project.title, project.id);
         //project tab functionality
-        addTabListeners(projectDOM);
+        addTabListeners(projectTab);
     });
     currentProject = JSON.parse(localStorage.getItem('current_project'))
     // todoCreation.setupExistingTodos();
 }
 
-// export { addProject, projectList, currentProject, setupNewProject, setupExistingProjects };
-export { setupNewProject, setupExistingProjects, projectList, currentProject }
+// // export { addProject, projectList, currentProject, setupNewProject, setupExistingProjects };
+// export { setupNewProject, setupExistingProjects, projectList, currentProject }
+export { setupNewProject, setupExistingProjects, projectList, currentProject };

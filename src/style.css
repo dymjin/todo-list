@@ -1,9 +1,22 @@
-.project-tab-title-wrapper {
+.project-tab-title-container {
     position: relative;
     display: inline-block;
 }
 
-.project-input-wrapper {
+.project-tab-title-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.todo-tab-title-container {
+    position: relative;
+    display: inline-block;
+}
+
+.todo-tab-title-wrapper {
     position: absolute;
     top: 0;
     left: 0;

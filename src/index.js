@@ -2,19 +2,29 @@
 import * as todoCreation from './todoCreation.js';
 import * as projectCreation from './projectCreation.js';
 
-let storedProjectList = JSON.parse(localStorage.getItem('project_list'));
-if (storedProjectList) {
-    projectCreation.setupExistingProjects(storedProjectList);
-    todoCreation.setupExistingTodos();
+
+const storedProjectList = JSON.parse(localStorage.getItem('project_list'));
+const inboxTodos = JSON.parse(localStorage.getItem('inbox_todos'));
+if (storedProjectList || inboxTodos) {
+    if (storedProjectList && inboxTodos) {
+        projectCreation.setupExistingProjects(storedProjectList);
+        todoCreation.setupExistingTodos(inboxTodos);
+    } else if (storedProjectList) {
+        projectCreation.setupExistingProjects(storedProjectList);
+    } else {
+        todoCreation.setupExistingTodos(inboxTodos);
+    }
 } else {
-    projectCreation.setupNewProject();
-    todoCreation.setupNewTodo();
+    projectCreation.setupInboxProject();
 }
 
 document.querySelector('.add-project').addEventListener('click', () => {
     projectCreation.setupNewProject();
-    // todoCreation.setupNewTodo();
 });
 document.querySelector('.add-todo').addEventListener('click', () => {
-    todoCreation.setupNewTodo();
+    if (localStorage.getItem('project_list')) {
+
+    } else {
+        todoCreation.setupNewTodo(JSON.parse(localStorage.getItem('inbox_todos')));
+    }
 });

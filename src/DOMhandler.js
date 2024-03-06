@@ -95,8 +95,8 @@ function addProjectTab(text = 'My project', projectID = 1) {
 }
 
 function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox'), dueDate = format(new Date(), "dd-MM-yyyy"), priority = '', projectID = 1, todoID = 1) {
-    const todoTabsContainer = addElement('todo-tabs-container', '', parent);
-    const todoTab = addTab('todo', text, todoTabsContainer, 'My todo');
+    // const todoTabsContainer = addElement('todo-tabs-container', '', parent);
+    const todoTab = addTab('todo', text, document.querySelector('.inbox'), 'My todo');
     todoTab.setAttribute('data', `${projectID}-${todoID}`)
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab);
     todoTab.draggable = true;

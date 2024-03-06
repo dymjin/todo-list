@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import * as projectCreation from './projectCreation.js';
 import * as DOMhandler from './DOMhandler.js';
 
 let currentTodo, checkboxIndex = 1;
@@ -7,51 +6,71 @@ let currentTodo, checkboxIndex = 1;
 function addTodo(title = '', desc = '', dueDate = format(new Date(), "yyyy-MM-dd"),
     priority = '', notes = '', checkboxArr = [], status = 'pending', id = 1) {
     const currProj = JSON.parse(localStorage.getItem('current_project'));
-    // let currProject = JSON.parse(localStorage.getItem('current_project'));
-    if (currProj.todoList.length) {
-        //find element with highest id, then add 1 for new id
-        let sortedArr = currProj.todoList.sort((a, b) => a.id - b.id)
-        id = (sortedArr.at(-1).id + 1);
+    const inboxArr = JSON.parse(localStorage.getItem('inbox_todos'));
+    if (inboxArr && !currProj) {
+        if (inboxArr[0].todoList.length) {
+            //find element with highest id, then add 1 for new id
+            let sortedArr = inboxArr[0].todoList.sort((a, b) => a.id - b.id)
+            id = (sortedArr.at(-1).id + 1);
+        }
+    }
+    else {
+        if (currProj.todoList.length) {
+            //find element with highest id, then add 1 for new id
+            let sortedArr = currProj.todoList.sort((a, b) => a.id - b.id)
+            id = (sortedArr.at(-1).id + 1);
+        }
     }
     return { title, desc, dueDate, priority, notes, checkboxArr, status, id };
 }
 
-function setupNewTodo() {
+function getStorage() {
+    let projList = JSON.parse(localStorage.getItem('project_list'));
+    let currProj = JSON.parse(localStorage.getItem('current_project'));
+    return [projList, currProj];
+}
+
+function setupNewTodo(parent) {
     currentTodo = addTodo();
-    // add new todo to global projectList
-    projectCreation.projectList[projectCreation.currentProject.id - 1].todoList.push(currentTodo);
-    setStorage(projectCreation.projectList, projectCreation.currentProject);
+    if (parent[0].id === 0) {
+        parent[0].todoList.push(currentTodo);
+        localStorage.setItem('inbox_todos', JSON.stringify(parent));
+        localStorage.setItem('current_todo', JSON.stringify(currentTodo))
+    } else {
+        parent[getStorage()[1].id - 1].todoList.push(currentTodo);
+        setStorage(parent, getStorage()[1], currentTodo);
+    }
     const todoInputs = DOMhandler.addTodoInputs();
-    // const todoTab = DOMhandler.addTodoTab();
+    const todoTab = DOMhandler.addTodoTab('', undefined, undefined, undefined, 0, currentTodo.id);
     // addTodoTabListeners(todoTab)
     addInputListeners(todoInputs);
 }
 
-function setupExistingTodos() {
-    currentTodo = JSON.parse(localStorage.getItem('current_todo'));
-    if (localStorage.getItem('current_project')) {
-        projectCreation.currentProject.todoList.forEach((todo) => {
-            // const todoTab = DOMhandler.addTodoTab(todo.title,
-                // document.querySelector(`.project-tab[data="${projectCreation.currentProject.id}"]`),
-                // format(new Date(todo.dueDate), 'dd-MM-yyyy'), todo.priority, projectCreation.currentProject.id, todo.id);
-            // addTodoTabListeners(todoTab);
-        })
-    } else {
-        projectCreation.currentProject.todoList.forEach((todo) => {
-            // const todoTab = DOMhandler.addTodoTab(todo.title, undefined,
-            //     format(new Date(todo.dueDate), 'dd-MM-yyyy'), todo.priority, projectCreation.currentProject.id, todo.id);
-            // addTodoTabListeners(todoTab);
-        })
-    }
-    const todoInputs = DOMhandler.addTodoInputs(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
-        currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr);
+function setupExistingTodos(parent) {
+    const currTodo = JSON.parse(localStorage.getItem('current_todo'));
+    // if (parent) {
+    parent[0].todoList.forEach((todo) => {
+        const todoTab = DOMhandler.addTodoTab(todo.title, undefined,
+            // document.querySelector(`.project-tab[data="${projectCreation.currentProject.id}"]`),
+            format(new Date(todo.dueDate), 'dd-MM-yyyy'), todo.priority, 0, todo.id);
+        // addTodoTabListeners(todoTab);
+    })
+    // } else {
+    //     projectCreation.currentProject.todoList.forEach((todo) => {
+    //         // const todoTab = DOMhandler.addTodoTab(todo.title, undefined,
+    //         //     format(new Date(todo.dueDate), 'dd-MM-yyyy'), todo.priority, projectCreation.currentProject.id, todo.id);
+    //         // addTodoTabListeners(todoTab);
+    //     })
+    // }
+    const todoInputs = DOMhandler.addTodoInputs(currTodo.title, currTodo.desc, currTodo.dueDate,
+        currTodo.priority, currTodo.notes, currTodo.checkboxArr);
     addInputListeners(todoInputs);
 }
 
-function setStorage(projectList, currentProject) {
-    localStorage.setItem('project_list', JSON.stringify(projectList));
-    localStorage.setItem('current_project', JSON.stringify(projectList[currentProject.id - 1]));
-    localStorage.setItem('current_todo', JSON.stringify(projectList[currentProject.id - 1].todoList[currentTodo.id - 1]));
+function setStorage(projList, currProj, currTodo) {
+    localStorage.setItem('project_list', JSON.stringify(projList));
+    localStorage.setItem('current_project', JSON.stringify(currProj));
+    localStorage.setItem('current_todo', JSON.stringify(currTodo));
 }
 
 // function addTodoTabListeners(tab) {
@@ -108,82 +127,107 @@ function setStorage(projectList, currentProject) {
 // }
 
 function addInputListeners(todoContainer) {
-    let pList = projectCreation.projectList;
-    let currProject = projectCreation.currentProject;
-    let pListCurrTodo = pList[currProject.id - 1].todoList[currentTodo.id - 1];
+    const inboxTodos = JSON.parse(localStorage.getItem('inbox_todos'));
+    const currentTodo = JSON.parse(localStorage.getItem('current_todo'));
+    let pList, currProj, currTodo;
+    if (inboxTodos) {
+        pList = inboxTodos;
+        currProj = inboxTodos[0];
+        currTodo = pList[0].todoList[JSON.parse(localStorage.getItem('current_todo')).id - 1];
+    } else {
+        // pList = parent;
+        // currProj = getStorage()[1];
+        // currTodo = pList[currProject.id - 1].todoList[JSON.parse(localStorage.getItem('current_todo')).id - 1];
+    }
     for (let i = 0; i < 5; i++) {
         todoContainer.childNodes[i].addEventListener('input', () => {
-            //change todo tab DOM
-            // if (todoContainer.childNodes[0].value !== '') {
-            //     document.querySelector(`.todo-tab-title[data="${currProject.id}-${pListCurrTodo.id}"]`).value = todoContainer.childNodes[0].value;
-            // }
-            // if (todoContainer.childNodes[2].value !== '') {
-            //     document.querySelector(`.todo-tab-duedate[data="${currProject.id}-${pListCurrTodo.id}"]`)
-            //         .textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM-yyyy");
-            //     pListCurrTodo.dueDate = new Date();
-            // }
+            // change todo tab DOM
+            const todoTab = document.querySelector(`.todo-tab[data="0-${currentTodo.id}"]`);
+            if (todoContainer.childNodes[0].value !== '') {
+                todoTab.childNodes[0].childNodes[1].value = todoContainer.childNodes[0].value;
+            }
+            if (todoContainer.childNodes[2].value !== '') {
+                todoTab.childNodes[1].textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM-yyyy");
+            }
             //add input event listener for all todoDOM elements
-            pListCurrTodo.title = todoContainer.childNodes[0].value;
-            pListCurrTodo.desc = todoContainer.childNodes[1].value;
-            pListCurrTodo.dueDate = todoContainer.childNodes[2].value;
-            pListCurrTodo.priority = todoContainer.childNodes[3].value;
-            pListCurrTodo.notes = todoContainer.childNodes[4].value;
-            setStorage(pList, currProject);
+            currTodo.title = todoContainer.childNodes[0].value;
+            currTodo.desc = todoContainer.childNodes[1].value;
+            currTodo.dueDate = todoContainer.childNodes[2].value;
+            currTodo.priority = todoContainer.childNodes[3].value;
+            currTodo.notes = todoContainer.childNodes[4].value;
+            if (inboxTodos) {
+                localStorage.setItem('inbox_todos', JSON.stringify(pList));
+                localStorage.setItem('current_todo', JSON.stringify(currTodo));
+            } else {
+                // setStorage();
+            }
         })
     }
     //if checkboxArr exists, setup checkbox with values of checkboxArr
     if (currentTodo.checkboxArr.length) {
-        setupExistingCheckbox(pListCurrTodo, currentTodo.checkboxArr);
+        setupExistingCheckbox(currTodo, currentTodo.checkboxArr, inboxTodos);
     }
 
     todoContainer.childNodes[5].addEventListener('click', () => {
-        setupNewCheckbox(pListCurrTodo);
+        setupNewCheckbox(currTodo, inboxTodos);
     });
 }
 
-function setupExistingCheckbox(projectListCurrentTodo, currentCheckboxArr) {
+function setupExistingCheckbox(currTodo, currentCheckboxArr, parent) {
     const checkboxContainer = document.querySelector('.checkbox-container');
     //clear checkboxDOM if it exists
     while (checkboxContainer.firstChild) {
         checkboxContainer.removeChild(checkboxContainer.firstChild)
     }
+    console.log(currentCheckboxArr)
     currentCheckboxArr.forEach(checkbox => {
         const label = DOMhandler.addCheckbox(checkboxContainer, checkbox);
         const labelChildren = label.childNodes;
         //set both checkbox-item + checkbox-item-title's data attribute, respectively
         for (let i = 0; i < 2; i++) {
-            labelChildren[i].setAttribute('data', `${projectCreation.currentProject.id}-${currentTodo.id}-${checkbox.id}`);
+            labelChildren[i].setAttribute('data', checkbox.id);
         }
-        addCheckboxListeners(projectListCurrentTodo, labelChildren);
+        addCheckboxListeners(currTodo, labelChildren, parent);
         checkboxIndex++;
     })
 }
 
-function setupNewCheckbox(projectListCurrentTodo) {
+function setupNewCheckbox(currTodo, parent) {
     const checkboxContainer = document.querySelector('.checkbox-container');
     const label = DOMhandler.addCheckbox(checkboxContainer);
     const labelChildren = label.childNodes;
     for (let i = 0; i < 2; i++) {
-        labelChildren[i].setAttribute('data', `${projectCreation.currentProject.id}-${currentTodo.id}-${checkboxIndex}`);
+        // labelChildren[i].setAttribute('data', `${projectCreation.currentProject.id}-${currentTodo.id}-${checkboxIndex}`);
+        labelChildren[i].setAttribute('data', checkboxIndex);
     }
     //add checkbox obj to the currentTodo's checkboxArr
-    projectListCurrentTodo.checkboxArr
+    currTodo.checkboxArr
         .push({ title: label.children[1].value, state: label.children[0].checked, id: checkboxIndex });
-    setStorage(projectCreation.projectList, projectCreation.currentProject);
-    addCheckboxListeners(projectListCurrentTodo, labelChildren);
+    if (parent) {
+        localStorage.setItem('inbox_todos', JSON.stringify(parent));
+        localStorage.setItem('current_todo', JSON.stringify(currTodo));
+    } else {
+        // setStorage();
+    }
+    addCheckboxListeners(currTodo, labelChildren, parent);
     checkboxIndex++;
 }
 
-function addCheckboxListeners(projectListCurrentTodo, labelChildren) {
+function addCheckboxListeners(currTodo, labelChildren, parent) {
     for (let i = 0; i < 2; i++) {
         labelChildren[i].addEventListener('input', () => {
             // checkbox input element
-            projectListCurrentTodo.checkboxArr[labelChildren[0]
-                .getAttribute('data')[4] - 1].state = labelChildren[0].checked;
+            currTodo.checkboxArr[labelChildren[0]
+                .getAttribute('data') - 1].state = labelChildren[0].checked;
             // text input element
-            projectListCurrentTodo.checkboxArr[labelChildren[1]
-                .getAttribute('data')[4] - 1].title = labelChildren[1].value;
-            setStorage(projectCreation.projectList, projectCreation.currentProject)
+            currTodo.checkboxArr[labelChildren[1]
+                .getAttribute('data') - 1].title = labelChildren[1].value;
+            if (parent) {
+                localStorage.setItem('inbox_todos', JSON.stringify(parent));
+                localStorage.setItem('current_todo', JSON.stringify(currTodo));
+            } else {
+                // setStorage();
+            }
         })
     }
 }

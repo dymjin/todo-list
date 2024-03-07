@@ -21,17 +21,17 @@ function setupInboxProject() {
     let inboxArr = [];
     inboxArr.push(addProject('inbox', [], 0));
     localStorage.setItem('inbox_todos', JSON.stringify(inboxArr));
-    inboxArr.push(todoCreation.setupNewTodo(inboxArr));
+    todoCreation.setupNewTodo(inboxArr);
 }
 
 function setupNewProject() {
     currentProject = addProject();
     projectList.push(currentProject);
-    currentProject.push(todoCreation.setupNewTodo(currentProject));
     setStorage(projectList, currentProject);
-    // const projectTab = DOMhandler.addProjectTab('', currentProject.id);
-    // addTabListeners(projectTab);
-    // todoCreation.setupNewTodo();
+    const projectTab = DOMhandler.addProjectTab('', currentProject.id);
+    todoCreation.setupNewTodo(projectList);
+    setStorage(projectList, currentProject);
+    addTabListeners(projectTab);
 }
 
 
@@ -107,11 +107,13 @@ function setupExistingProjects(list) {
         //copy provided project list to projectList
         projectList.push(project);
         const projectTab = DOMhandler.addProjectTab(project.title, project.id);
+        currentProject = project;
+        localStorage.setItem('current_project', JSON.stringify(currentProject))
+        todoCreation.setupExistingTodos(project);
         //project tab functionality
         addTabListeners(projectTab);
     });
     currentProject = JSON.parse(localStorage.getItem('current_project'))
-    // todoCreation.setupExistingTodos();
 }
 
 // // export { addProject, projectList, currentProject, setupNewProject, setupExistingProjects };

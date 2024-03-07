@@ -8,17 +8,24 @@ function clearDOM(mode) {
     }
 }
 
-function clearTabDOM(mode) {
+function clearTabDOM(mode, id = 1, submode) {
     const projectTabsContainer = document.querySelector('.project-tabs-container');
     const inbox = document.querySelector('.inbox');
+    const projectTodosContainer = document.querySelector(`.project-todos-container[data="${id}"]`);
     if (mode === 'project') {
         while (projectTabsContainer.firstChild) {
             projectTabsContainer.removeChild(projectTabsContainer.firstChild);
         }
     }
     if (mode === 'todo') {
-        while (inbox.firstChild) {
-            inbox.removeChild(inbox.firstChild);
+        if (submode === 'inbox') {
+            while (inbox.firstChild) {
+                inbox.removeChild(inbox.firstChild);
+            }
+        } else if (submode === 'project_todo') {
+            while (projectTodosContainer.firstChild) {
+                projectTodosContainer.removeChild(projectTodosContainer.firstChild)
+            }
         }
     }
 }
@@ -90,13 +97,16 @@ function addTab(name, text, parent, placeholder) {
 function addProjectTab(text = 'My project', projectID = 1) {
     const projectTab = addTab('project', text, document.querySelector('.project-tabs-container'), 'My project');
     projectTab.setAttribute('data', projectID);
-    projectTab.id = `todo-dest-${projectID}`;
+    const projectTodosContainer = addElement('project-todos-container', '', projectTab);
+    projectTodosContainer.setAttribute('data', projectID);
+    projectTodosContainer.id = `todo-dest-${projectID}`;
     return projectTab;
 }
 
 function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox'), dueDate = format(new Date(), "dd-MM-yyyy"), priority = '', projectID = 1, todoID = 1) {
     // const todoTabsContainer = addElement('todo-tabs-container', '', parent);
-    const todoTab = addTab('todo', text, document.querySelector('.inbox'), 'My todo');
+    // console.log(parent)
+    const todoTab = addTab('todo', text, parent, 'My todo');
     todoTab.setAttribute('data', `${projectID}-${todoID}`)
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab);
     todoTab.draggable = true;

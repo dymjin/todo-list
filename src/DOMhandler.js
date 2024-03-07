@@ -1,32 +1,33 @@
 import styles from './style.css';
 import { format } from "date-fns";
 
-function clearDOM(mode) {
+function clearDOM() {
     const todoContainer = document.querySelector('.todo-container');
-    if (mode === "todo" && todoContainer) {
+    if (todoContainer) {
         todoContainer.parentNode.removeChild(todoContainer);
     }
 }
 
-function clearTabDOM(mode, id = 1, submode) {
+function clearTabDOM(mode, id = 1) {
     const projectTabsContainer = document.querySelector('.project-tabs-container');
     const inbox = document.querySelector('.inbox');
     const projectTodosContainer = document.querySelector(`.project-todos-container[data="${id}"]`);
-    if (mode === 'project') {
-        while (projectTabsContainer.firstChild) {
-            projectTabsContainer.removeChild(projectTabsContainer.firstChild);
-        }
-    }
-    if (mode === 'todo') {
-        if (submode === 'inbox') {
+    switch (mode) {
+        case 'project':
+            while (projectTabsContainer.firstChild) {
+                projectTabsContainer.removeChild(projectTabsContainer.firstChild);
+            }
+            break;
+        case 'inbox':
             while (inbox.firstChild) {
                 inbox.removeChild(inbox.firstChild);
             }
-        } else if (submode === 'project_todo') {
+            break;
+        case 'project todo':
             while (projectTodosContainer.firstChild) {
                 projectTodosContainer.removeChild(projectTodosContainer.firstChild)
             }
-        }
+            break;
     }
 }
 
@@ -108,10 +109,12 @@ function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox'),
     // console.log(parent)
     const todoTab = addTab('todo', text, parent, 'My todo');
     todoTab.setAttribute('data', `${projectID}-${todoID}`)
+    const todoStatus = addInput('todo-status', '', todoTab, 'checkbox');
+    todoTab.insertBefore(todoStatus, todoTab.childNodes[0]);
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab);
     todoTab.draggable = true;
     todoTab.id = 'todo-src';
-    const editTab = todoTab.childNodes[1];
+    const editTab = todoTab.childNodes[2];
     todoTab.insertBefore(todoTabDueDate, editTab)
     switch (priority.toLowerCase()) {
         case 'low':
@@ -128,7 +131,7 @@ function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox'),
 }
 
 function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '') {
-    clearDOM('todo');
+    clearDOM();
     const todoContainer = addElement('todo-container', '', document.querySelector('.inbox'));
     const todoTitle = addInput('todo-title', title, todoContainer, '', 'Title');
     const todoDesc = addInput('todo-desc', desc, todoContainer, '', 'Description');

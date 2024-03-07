@@ -52,19 +52,19 @@ function setupExistingTodos(project) {
     const inboxTodos = JSON.parse(localStorage.getItem('inbox_todos'));
     const projectList = getStorage()[0];
     const currTodo = JSON.parse(localStorage.getItem('current_todo'));
-    DOMhandler.clearTabDOM('todo', '', 'inbox');
+    DOMhandler.clearTabDOM('inbox');
     if (project) {
         // DOMhandler.clearTabDOM('todo', getStorage()[0].id, 'project_todo');
         projectList[getStorage()[1].id - 1].todoList.forEach(todo => {
             DOMhandler.addTodoTab(todo.title,
                 document.querySelector(`.project-todos-container[data="${project.id}"]`),
-                todo.dueDate, todo.priority, project.id, todo.id);
+                format(new Date(todo.dueDate), 'dd-MM-yyyy'), todo.priority, project.id, todo.id);
             // addTodoTabListeners(todoTab);
         })
     }
     inboxTodos[0].todoList.forEach(todo => {
         DOMhandler.addTodoTab(todo.title, undefined,
-            undefined, todo.priority, 0, todo.id);
+            format(new Date(todo.dueDate), 'dd-MM-yyyy'), todo.priority, 0, todo.id);
         // addTodoTabListeners(todoTab);
     })
     const todoInputs = DOMhandler.addTodoInputs(currTodo.title, currTodo.desc, currTodo.dueDate,
@@ -149,10 +149,10 @@ function addInputListeners(todoContainer) {
             // change todo tab DOM
             const todoTab = document.querySelector(`.todo-tab[data="0-${currentTodo.id}"]`);
             if (todoContainer.childNodes[0].value !== '') {
-                todoTab.childNodes[0].childNodes[1].value = todoContainer.childNodes[0].value;
+                todoTab.childNodes[1].childNodes[1].value = todoContainer.childNodes[0].value;
             }
             if (todoContainer.childNodes[2].value !== '') {
-                todoTab.childNodes[1].textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM-yyyy");
+                todoTab.childNodes[2].textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM-yyyy");
             }
             //add input event listener for all todoDOM elements
             currTodo.title = todoContainer.childNodes[0].value;

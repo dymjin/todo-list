@@ -102,7 +102,7 @@ function addTabListeners(tab) {
 }
 
 function setupExistingProjects(list) {
-    DOMhandler.clearTabDOM('project');
+    // DOMhandler.clearTabDOM('project');
     list.forEach(project => {
         //copy provided project list to projectList
         projectList.push(project);

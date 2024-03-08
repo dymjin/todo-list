@@ -1,7 +1,7 @@
 import * as DOMhandler from './DOMhandler.js';
 import * as todoCreation from './todoCreation.js';
 
-let projectList = [], currentProject;
+let projectList = [], currentProject, inboxArr = [];
 
 function addProject(title = '', todoList = [], id = 1) {
     const storedProjectList = JSON.parse(localStorage.getItem('project_list'));
@@ -12,28 +12,49 @@ function addProject(title = '', todoList = [], id = 1) {
     return { title, todoList, id };
 }
 
+function initInbox() {
+    inboxArr.push(addProject('inbox', [], 0));
+    localStorage.setItem('inbox_project', JSON.stringify(inboxArr));
+    // todoCreation.setupNewTodo(inboxArr);
+}
+if (!localStorage.getItem('inbox_project')) {
+    initInbox();
+    todoCreation.setupNewTodo();
+}
+todoCreation.setupInboxTodos();
+
 function setStorage(projList, currProj) {
     localStorage.setItem('project_list', JSON.stringify(projList));
     localStorage.setItem('current_project', JSON.stringify(currProj));
 }
 
-function setupInboxProject() {
-    let inboxArr = [];
-    inboxArr.push(addProject('inbox', [], 0));
-    localStorage.setItem('inbox_todos', JSON.stringify(inboxArr));
-    todoCreation.setupNewTodo(inboxArr);
-}
-
 function setupNewProject() {
+    const projList = JSON.parse(localStorage.getItem('project_list'));
+    // const currProj = JSON.parse(localStorage.getItem('current_project'));
     currentProject = addProject();
-    projectList.push(currentProject);
-    setStorage(projectList, currentProject);
+    if (projList) {
+        projList.push(currentProject);
+        setStorage(projList, currentProject);
+    } else {
+        projectList.push(currentProject);
+        setStorage(projectList, currentProject);
+    }
     const projectTab = DOMhandler.addProjectTab('', currentProject.id);
-    todoCreation.setupNewTodo(projectList);
-    setStorage(projectList, currentProject);
     addTabListeners(projectTab);
+    todoCreation.setupNewTodo();
 }
 
+function setupExistingProjects(projList) {
+    projList.forEach(project => {
+        //copy provided project list to projectList
+        projectList.push(project);
+        const projectTab = DOMhandler.addProjectTab(project.title, project.id);
+        currentProject = project;
+        //project tab functionality
+        addTabListeners(projectTab);
+    });
+    todoCreation.setupProjectTodos();
+}
 
 function addTabListeners(tab) {
     //https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setData
@@ -101,21 +122,4 @@ function addTabListeners(tab) {
     })
 }
 
-function setupExistingProjects(list) {
-    // DOMhandler.clearTabDOM('project');
-    list.forEach(project => {
-        //copy provided project list to projectList
-        projectList.push(project);
-        const projectTab = DOMhandler.addProjectTab(project.title, project.id);
-        currentProject = project;
-        localStorage.setItem('current_project', JSON.stringify(currentProject))
-        todoCreation.setupExistingTodos(project);
-        //project tab functionality
-        addTabListeners(projectTab);
-    });
-    currentProject = JSON.parse(localStorage.getItem('current_project'))
-}
-
-// // export { addProject, projectList, currentProject, setupNewProject, setupExistingProjects };
-// export { setupNewProject, setupExistingProjects, projectList, currentProject }
-export { setupNewProject, setupExistingProjects, setupInboxProject };
+export { setupNewProject, setupExistingProjects };

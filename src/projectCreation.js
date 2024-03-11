@@ -13,15 +13,19 @@ function addProject(title = '', todoList = [], id = 1) {
 }
 
 function initInbox() {
-    inboxArr.push(addProject('inbox', [], 0));
+    let currentProject = addProject('inbox', [], 0);
+    inboxArr.push(currentProject);
     localStorage.setItem('inbox_project', JSON.stringify(inboxArr));
+    localStorage.setItem('current_project', JSON.stringify(currentProject))
     // todoCreation.setupNewTodo(inboxArr);
 }
 if (!localStorage.getItem('inbox_project')) {
     initInbox();
     todoCreation.setupNewTodo();
+} else {
+    todoCreation.setupExistingTodos(JSON.parse(localStorage.getItem('inbox_project')),
+        document.querySelector('.inbox'));
 }
-todoCreation.setupInboxTodos();
 
 function setStorage(projList, currProj) {
     localStorage.setItem('project_list', JSON.stringify(projList));
@@ -53,7 +57,7 @@ function setupExistingProjects(projList) {
         //project tab functionality
         addTabListeners(projectTab);
     });
-    todoCreation.setupProjectTodos();
+    todoCreation.setupExistingTodos(projList)
 }
 
 function addTabListeners(tab) {

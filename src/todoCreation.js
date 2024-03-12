@@ -40,7 +40,7 @@ function setupNewTodo() {
     setStorage(projList, currProj, currentTodo, inbox);
     // addTodoTabListeners(todoTab)
     const todoInputs = DOMhandler.addTodoInputs();
-    // addInputListeners(todoInputs);
+    addInputListeners(todoInputs);
 }
 
 function setupExistingTodos(parent, parentElem) {
@@ -56,41 +56,39 @@ function setupExistingTodos(parent, parentElem) {
     currentTodo = JSON.parse(localStorage.getItem('current_todo'));
     const todoInputs = DOMhandler.addTodoInputs(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
         currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr);
-    // addInputListeners(todoInputs);
+    addInputListeners(todoInputs);
 }
 
 function addInputListeners(todoContainer) {
     const inbox = JSON.parse(localStorage.getItem('inbox_project'));
     const currentProj = JSON.parse(localStorage.getItem('current_project'));
     const projectList = JSON.parse(localStorage.getItem('project_list'));
-    if (currentProj) {
-        currTodo = projectList[currentProj.id - 1].todoList[currentTodo.id - 1];
-    } else {
-        currTodo = inbox[0].todoList[currentTodo.id - 1];
-    }
+    let projectTodo, todoTab;
+    projectTodo = currentProj.todoList[currentTodo.id - 1];
     for (let i = 0; i < 5; i++) {
         todoContainer.childNodes[i].addEventListener('input', () => {
             // change todo tab DOM
-            let todoTab;
-            if (currentProj) {
+            if (currentProj.id) {
                 todoTab = document.querySelector(`.todo-tab[data="${currentProj.id}-${currentTodo.id}"]`);
             } else {
                 todoTab = document.querySelector(`.todo-tab[data="0-${currentTodo.id}"]`);
             }
             //potential optimization
-            if (todoContainer.childNodes[0].value !== '') {
+            if (todoContainer.childNodes[0].value) {
                 todoTab.childNodes[1].childNodes[1].value = todoContainer.childNodes[0].value;
             }
-            if (todoContainer.childNodes[2].value !== '') {
+            if (todoContainer.childNodes[2].value) {
                 todoTab.childNodes[2].textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM-yyyy");
             }
             //add input event listener for all todoDOM elements
-            currTodo.title = todoContainer.childNodes[0].value;
-            currTodo.desc = todoContainer.childNodes[1].value;
-            currTodo.dueDate = todoContainer.childNodes[2].value;
-            currTodo.priority = todoContainer.childNodes[3].value;
-            currTodo.notes = todoContainer.childNodes[4].value;
-            setStorage(projectList, currentProj, currTodo, inbox);
+            projectTodo.title = todoContainer.childNodes[0].value;
+            projectTodo.desc = todoContainer.childNodes[1].value;
+            projectTodo.dueDate = todoContainer.childNodes[2].value;
+            projectTodo.priority = todoContainer.childNodes[3].value;
+            projectTodo.notes = todoContainer.childNodes[4].value;
+            if (projectList) { projectList[currentProj.id - 1].todoList[currentTodo.id - 1] = projectTodo; }
+            else { inbox[0].todoList[currentTodo.id - 1] = projectTodo; }
+            setStorage(projectList, currentProj, projectTodo, inbox);
         })
     }
     const checkboxContainer = document.querySelector('.checkbox-container');
@@ -99,20 +97,23 @@ function addInputListeners(todoContainer) {
             checkboxContainer.removeChild(checkboxContainer.firstChild)
         }
     }
-    //if checkboxArr exists, setup checkbox with values of checkboxArr
-    if (currTodo.checkboxArr.length) {
-        currTodo.checkboxArr.forEach(checkbox => {
+
+    // if checkboxArr exists, setup checkbox with values of checkboxArr
+    if (projectTodo.checkboxArr.length) {
+        projectTodo.checkboxArr.forEach(checkbox => {
             const label = DOMhandler.addCheckbox(checkboxContainer, checkbox);
             label.childNodes.forEach(child => {
                 child.setAttribute('data', checkbox.id);
                 child.addEventListener('input', () => {
                     //checkbox input element
-                    currTodo.checkboxArr[label.childNodes[0]
+                    projectTodo.checkboxArr[label.childNodes[0]
                         .getAttribute('data') - 1].state = label.childNodes[0].checked;
                     // text input element
-                    currTodo.checkboxArr[label.childNodes[1]
+                    projectTodo.checkboxArr[label.childNodes[1]
                         .getAttribute('data') - 1].title = label.childNodes[1].value;
-                    setStorage(projectList, currentProj, currTodo, inbox);
+                    if (projectList) { projectList[currentProj.id - 1].todoList[currentTodo.id - 1] = projectTodo; }
+                    else { inbox[0].todoList[currentTodo.id - 1] = projectTodo; }
+                    setStorage(projectList, currentProj, projectTodo, inbox);
                 });
             })
             checkboxIndex++;
@@ -124,18 +125,22 @@ function addInputListeners(todoContainer) {
         label.childNodes.forEach(child => {
             child.setAttribute('data', checkboxIndex);
         })
-        currTodo.checkboxArr
+        projectTodo.checkboxArr
             .push({ title: label.childNodes[1].value, state: label.childNodes[0].checked, id: checkboxIndex });
-        setStorage(projectList, currentProj, currTodo, inbox);
+        if (projectList) { projectList[currentProj.id - 1].todoList[currentTodo.id - 1] = projectTodo; }
+        else { inbox[0].todoList[currentTodo.id - 1] = projectTodo; }
+        setStorage(projectList, currentProj, projectTodo, inbox);
         label.childNodes.forEach(child => {
             child.addEventListener('input', () => {
                 //checkbox input element
-                currTodo.checkboxArr[label.childNodes[0]
+                projectTodo.checkboxArr[label.childNodes[0]
                     .getAttribute('data') - 1].state = label.childNodes[0].checked;
                 // text input element
-                currTodo.checkboxArr[label.childNodes[1]
+                projectTodo.checkboxArr[label.childNodes[1]
                     .getAttribute('data') - 1].title = label.childNodes[1].value;
-                setStorage(projectList, currentProj, currTodo, inbox);
+                if (projectList) { projectList[currentProj.id - 1].todoList[currentTodo.id - 1] = projectTodo; }
+                else { inbox[0].todoList[currentTodo.id - 1] = projectTodo; }
+                setStorage(projectList, currentProj, projectTodo, inbox);
             });
         })
         checkboxIndex++;

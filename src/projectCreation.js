@@ -17,8 +17,8 @@ function initInbox() {
     inboxArr.push(currentProject);
     localStorage.setItem('inbox_project', JSON.stringify(inboxArr));
     localStorage.setItem('current_project', JSON.stringify(currentProject))
-    // todoCreation.setupNewTodo(inboxArr);
 }
+
 if (!localStorage.getItem('inbox_project')) {
     initInbox();
     todoCreation.setupNewTodo();
@@ -34,7 +34,6 @@ function setStorage(projList, currProj) {
 
 function setupNewProject() {
     const projList = JSON.parse(localStorage.getItem('project_list'));
-    // const currProj = JSON.parse(localStorage.getItem('current_project'));
     currentProject = addProject();
     if (projList) {
         projList.push(currentProject);
@@ -116,23 +115,17 @@ function addTabListeners(tab) {
         const projectList = JSON.parse(localStorage.getItem('project_list'))
         currentProject = projectList[tabContainer.getAttribute('data') - 1];
         localStorage.setItem('current_project', JSON.stringify(currentProject));
-        // DOMhandler.clearTabDOM('todo');
-        // todoCreation.setupExistingTodos();
-
-        // tabTitle.disabled = false;
-        // projectList = JSON.parse(localStorage.getItem('project_list'));
-        // currentProject = projectList[tabContainer.getAttribute('data') - 1];
-        // let currentTodo = currentProject.todoList[currentProject.todoList.length - 1]
-        // todoCreation.setupExistingTodos(currentProject.todoList);
-        // localStorage.setItem('current_project', JSON.stringify(currentProject));
-        // localStorage.setItem('current_todo', JSON.stringify(currentTodo));
+        let todo = currentProject.todoList.at(-1);
+        localStorage.setItem('current_todo', JSON.stringify(todo));
+        todoCreation.addInputListeners(DOMhandler.addTodoInputs(todo.title, todo.desc, todo.dueDate,
+            todo.priority, todo.notes, todo.checkboxArr));
     })
     tabTitle.addEventListener('input', () => {
+        const projectList = JSON.parse(localStorage.getItem('project_list'));
         currentProject = projectList[tabContainer.getAttribute('data') - 1];
         currentProject.title = tabTitle.value;
         projectList[currentProject.id - 1].title = tabTitle.value;
-        localStorage.setItem('current_project', JSON.stringify(currentProject));
-        localStorage.setItem('project_list', JSON.stringify(projectList));
+        setStorage(projectList, currentProject);
     })
 }
 

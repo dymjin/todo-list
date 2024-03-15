@@ -66,26 +66,32 @@ function addTabListeners(tab) {
     // tab[0].addEventListener('dragenter', (ev) => {
     //     console.log('dragEnter');
     // })
+    const todoContainer = tab.childNodes[3];
     const tabContainer = tab;
     const titleWrapper = tab.childNodes[0].childNodes[0];
     const tabTitle = tab.childNodes[0].childNodes[1];
     const editTab = tab.childNodes[1];
     const removeTab = tab.childNodes[2];
     removeTab.addEventListener('click', () => {
+        currentProject = JSON.parse(localStorage.getItem('current_project'));
+        projectList = JSON.parse(localStorage.getItem('project_list'));
+        todoCreation.addInputListeners(DOMhandler.addTodoInputs())
         if (projectList.length > 1) {
-            currentProject = projectList[tabContainer.getAttribute('data') - 1];
-            projectList.splice(currentProject.id - 1, 1);
+            projectList.splice(tab.getAttribute('data') - 1, 1);
             projectList.forEach((project, index) => {
                 project.id = index + 1;
+                currentProject = project;
             })
-            if (projectList[currentProject.id]) { }
-            else { currentProject.id = projectList[projectList.length - 1].id }
+            setStorage(projectList, currentProject);
+            localStorage.setItem('current_todo', JSON.stringify(currentProject.todoList.at(-1)));
             const projectTabsContainer = document.querySelector('.project-tabs-container');
             projectTabsContainer.removeChild(tabContainer);
             projectTabsContainer.childNodes.forEach((elem, index) => {
                 elem.setAttribute('data', index + 1);
-                elem.childNodes.forEach(child => {
-                    child.setAttribute('data', index + 1);
+                elem.childNodes[3].setAttribute('data', index + 1);
+                elem.childNodes[3].id = `todo-dest-${index + 1}`;
+                elem.childNodes[3].childNodes.forEach((child, index2) => {
+                    child.setAttribute('data', `${index + 1}-${index2 + 1}`)
                 })
             });
         } else {
@@ -94,16 +100,20 @@ function addTabListeners(tab) {
             projectList.push(currentProject)
             currentProject.id = 1;
             document.querySelector('.project-tab-title').value = '';
+            while (todoContainer.firstChild) {
+                todoContainer.removeChild(todoContainer.firstChild)
+            }
+            setStorage(projectList, currentProject);
+            todoCreation.setupNewTodo();
         }
-        localStorage.setItem('project_list', JSON.stringify(projectList));
-        localStorage.setItem('current_project', JSON.stringify(currentProject));
     })
     editTab.addEventListener('click', () => {
         tabTitle.disabled = false;
         tabTitle.focus();
     })
     tabTitle.onblur = () => { tabTitle.disabled = true; };
-    titleWrapper.addEventListener('dblclick', () => {
+    titleWrapper.addEventListener('click', () => {
+        const projectList = JSON.parse(localStorage.getItem('project_list'))
         currentProject = projectList[tabContainer.getAttribute('data') - 1];
         localStorage.setItem('current_project', JSON.stringify(currentProject));
         // DOMhandler.clearTabDOM('todo');
@@ -111,10 +121,10 @@ function addTabListeners(tab) {
 
         // tabTitle.disabled = false;
         // projectList = JSON.parse(localStorage.getItem('project_list'));
-        currentProject = projectList[tabContainer.getAttribute('data') - 1];
+        // currentProject = projectList[tabContainer.getAttribute('data') - 1];
         // let currentTodo = currentProject.todoList[currentProject.todoList.length - 1]
         // todoCreation.setupExistingTodos(currentProject.todoList);
-        localStorage.setItem('current_project', JSON.stringify(currentProject));
+        // localStorage.setItem('current_project', JSON.stringify(currentProject));
         // localStorage.setItem('current_todo', JSON.stringify(currentTodo));
     })
     tabTitle.addEventListener('input', () => {

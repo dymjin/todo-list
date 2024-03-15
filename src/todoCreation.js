@@ -71,9 +71,16 @@ function addInputListeners(todoContainer) {
     const currentProj = JSON.parse(localStorage.getItem('current_project'));
     const projectList = JSON.parse(localStorage.getItem('project_list'));
     let projectTodo, todoTab;
+    currentTodo = JSON.parse(localStorage.getItem('current_todo'));
+    console.log(currentTodo.id)
     projectTodo = currentProj.todoList[currentTodo.id - 1];
     for (let i = 0; i < 5; i++) {
         todoContainer.childNodes[i].addEventListener('input', () => {
+            const inbox = JSON.parse(localStorage.getItem('inbox_project'));
+            const currentProj = JSON.parse(localStorage.getItem('current_project'));
+            const projectList = JSON.parse(localStorage.getItem('project_list'));
+            currentTodo = JSON.parse(localStorage.getItem('current_todo'));
+            projectTodo = currentProj.todoList[currentTodo.id - 1];
             // change todo tab DOM
             if (currentProj.id) {
                 todoTab = document.querySelector(`.todo-tab[data="${currentProj.id}-${currentTodo.id}"]`);
@@ -173,7 +180,6 @@ function addTodoTabListeners(tab) {
         const projList = JSON.parse(localStorage.getItem('project_list'));
         const inbox = JSON.parse(localStorage.getItem('inbox_project'));
         if (+tab.getAttribute('data')[0]) {
-            console.log(tab.getAttribute('data')[0])
             currProj = projList[tab.getAttribute('data')[0] - 1];
         } else {
             currProj = inbox[0];
@@ -229,4 +235,4 @@ function addTodoTabListeners(tab) {
     // })
 }
 
-export { setupNewTodo, setupExistingTodos, currentTodo }
+export { setupNewTodo, setupExistingTodos, addInputListeners }

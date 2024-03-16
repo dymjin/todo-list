@@ -72,7 +72,6 @@ function addInputListeners(todoContainer) {
     const projectList = JSON.parse(localStorage.getItem('project_list'));
     let projectTodo, todoTab;
     currentTodo = JSON.parse(localStorage.getItem('current_todo'));
-    console.log(currentTodo.id)
     projectTodo = currentProj.todoList[currentTodo.id - 1];
     for (let i = 0; i < 5; i++) {
         todoContainer.childNodes[i].addEventListener('input', () => {
@@ -174,6 +173,53 @@ function addTodoTabListeners(tab) {
     //     console.log('dragEnd');
     //     tab[0].style.backgroundColor = '';
     // })
+    const tabTitle = tab.childNodes[1].childNodes[1];
+    const removeTab = tab.childNodes[3]
+    removeTab.addEventListener('click', () => {
+        let currProj;
+        const projList = JSON.parse(localStorage.getItem('project_list'));
+        const inbox = JSON.parse(localStorage.getItem('inbox_project'));
+        // addInputListeners(DOMhandler.addTodoInputs());
+        if (+tab.getAttribute('data')[0]) {
+            currProj = projList[tab.getAttribute('data')[0] - 1];
+        } else {
+            currProj = inbox[0];
+        }
+        if (currProj.todoList.length > 1) {
+            currProj.todoList.splice(tab.getAttribute('data')[2] - 1, 1);
+            currProj.todoList.forEach((todo, index) => {
+                todo.id = index + 1;
+                currentTodo = todo;
+            })
+            let projectTodosContainer;
+            if (currProj.id) {
+                projList[currProj.id - 1].todoList = currProj.todoList;
+                projectTodosContainer = document.querySelector(`.project-todos-container[data="${currProj.id}"]`);
+            } else {
+                inbox[0].todoList = currProj.todoList;
+                projectTodosContainer = document.querySelector('.inbox')
+            }
+            setStorage(projList, currProj, currentTodo, inbox);
+            addInputListeners(DOMhandler.addTodoInputs(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
+                currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr))
+            projectTodosContainer.removeChild(tab);
+            projectTodosContainer.childNodes.forEach((elem, index) => {
+                elem.setAttribute('data', `${currProj.id}-${index + 1}`);
+            });
+        } else {
+            currProj.todoList.splice(0, 1);
+            currentTodo = addTodo();
+            currProj.todoList.push(currentTodo);
+            if (currProj.id) {
+                projList[currProj.id - 1].todoList = currProj.todoList;
+            } else {
+                inbox[0].todoList = currProj.todoList;
+            }
+            currentTodo.id = 1;
+            tabTitle.value = '';
+            setStorage(projList, currProj, currentTodo, inbox);
+        }
+    })
     const wrapper = tab.childNodes[1].childNodes[0];
     wrapper.addEventListener('click', () => {
         let currProj = JSON.parse(localStorage.getItem('current_project'));
@@ -190,49 +236,6 @@ function addTodoTabListeners(tab) {
         const inputs = DOMhandler.addTodoInputs(currTodo.title, currTodo.desc, currTodo.dueDate, currTodo.priority, currTodo.notes);
         addInputListeners(inputs);
     })
-    // const wrapper = tab.childNodes[1]
-    // const removeTab = tab[3];
-    // const editTab = tab[2];
-    // wrapper.addEventListener('click', () => {
-    //     currentTodo = tab.getAttribute('data')[2];
-    //     setStorage('', '', currentTodo);
-    //     console.log(currentTodo)
-    // })
-    // removeTab.addEventListener('click', () => {
-    //     const projList = projectCreation.projectList;
-    //     const currProj = projectCreation.currentProject;
-    //     if (projList[currProj.id - 1].todoList.length > 1) {
-    //         projList[currProj.id - 1].todoList.splice(removeTab.getAttribute('data')[2] - 1, 1);
-    //         projList[currProj.id - 1].todoList.forEach((todo, index) => {
-    //             todo.id = index + 1;
-    //         })
-    //         const todoContainer = document.querySelector(`.todo-tab-wrapper[data="${currProj.id}"]`);
-    //         todoContainer.removeChild(tab[0]);
-    //         todoContainer.childNodes.forEach((elem, index) => {
-    //             elem.setAttribute('data', `${currProj.id}-${index + 1}`);
-    //             elem.childNodes.forEach(child => {
-    //                 child.setAttribute('data', `${currProj.id}-${index + 1}`);
-    //                 elem.childNodes[0].childNodes.forEach(child => {
-    //                     child.setAttribute('data', `${currProj.id}-${index + 1}`);
-    //                 })
-    //             })
-    //         });
-
-    //         currentTodo = projList[currProj.id - 1].todoList.at(-1);
-
-    //     } else {
-    //         projList[currProj.id - 1].todoList.splice(0, 1);
-    //         currentTodo = addTodo();
-    //         currentTodo.id = 1;
-    //         projList[currProj.id - 1].todoList.push(currentTodo);
-    //         DOMhandler.clearDOM('todo');
-    //         const todoDOM = DOMhandler.addTodoDOM();
-    //         document.querySelector(`.todo-tab-title[data="${currProj.id}-${currentTodo.id}"]`).value = 'My todo';
-    //         document.querySelector(`.todo-tab-duedate[data="${currProj.id}-${currentTodo.id}"]`).textContent = format(new Date(), "dd-MM-yyyy");
-    //         addInputListeners(todoDOM);
-    //     }
-    //     setStorage(projectCreation.projectList, projectCreation.currentProject)
-    // })
 }
 
 export { setupNewTodo, setupExistingTodos, addInputListeners }

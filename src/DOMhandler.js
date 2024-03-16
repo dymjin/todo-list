@@ -115,7 +115,9 @@ function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox'),
     todoTab.draggable = true;
     todoTab.id = 'todo-src';
     const editTab = todoTab.childNodes[2];
-    todoTab.insertBefore(todoTabDueDate, editTab)
+    todoTab.removeChild(editTab);
+    const removeTab = todoTab.childNodes[2];
+    todoTab.insertBefore(todoTabDueDate,removeTab)
     switch (priority.toLowerCase()) {
         case 'low':
             todoTab.style.backgroundColor = '#85ffc8';

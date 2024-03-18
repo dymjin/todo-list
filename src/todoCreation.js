@@ -43,23 +43,21 @@ function setupNewTodo() {
     addInputListeners(todoInputs);
 }
 
-function setupExistingTodos(parent, parentElem) {
-    parent.forEach(project => {
-        if (parent[0].id) {
-            parentElem = document.querySelector(`.project-todos-container[data="${project.id}"]`)
-            project.todoList.forEach(todo => {
-                todoTab = DOMhandler.addTodoTab(todo.title, parentElem, format(new Date(todo.dueDate), 'dd-MM-yyyy'),
-                    todo.priority, project.id, todo.id);
-                addTodoTabListeners(todoTab);
-            })
-        } else {
-            project.todoList.forEach(todo => {
-                todoTab = DOMhandler.addTodoTab(todo.title, document.querySelector('.inbox'), format(new Date(todo.dueDate), 'dd-MM-yyyy'),
-                    todo.priority, project.id, todo.id);
-                addTodoTabListeners(todoTab);
-            })
-        }
-    })
+function setupExistingTodos(parent, project, parentElem) {
+    if (parent[0].id) {
+        parentElem = document.querySelector(`.project-todos-container[data="${project.id}"]`)
+        project.todoList.forEach(todo => {
+            todoTab = DOMhandler.addTodoTab(todo.title, parentElem, format(new Date(todo.dueDate), 'dd-MM-yyyy'),
+                todo.priority, project.id, todo.id);
+            addTodoTabListeners(todoTab);
+        })
+    } else {
+        project.todoList.forEach(todo => {
+            todoTab = DOMhandler.addTodoTab(todo.title, document.querySelector('.inbox'), format(new Date(todo.dueDate), 'dd-MM-yyyy'),
+                todo.priority, project.id, todo.id);
+            addTodoTabListeners(todoTab);
+        })
+    }
     currentTodo = JSON.parse(localStorage.getItem('current_todo'));
     const todoInputs = DOMhandler.addTodoInputs(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
         currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr);
@@ -163,16 +161,16 @@ function addInputListeners(todoContainer) {
 function addTodoTabListeners(tab) {
     //https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setData
     //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
-    // tab[0].addEventListener('dragstart', (ev) => {
+    // tab.addEventListener('dragstart', (ev) => {
     //     console.log('dragStart')
-    //     tab[0].style.backgroundColor = 'blue';
+    //     tab.style.backgroundColor = 'blue';
     //     ev.dataTransfer.clearData();
     //     ev.dataTransfer.setData("text/plain", ev.target.id);
-    // })
-    // tab[0].addEventListener('dragend', () => {
+    // });
+    // tab.addEventListener('dragend', () => {
     //     console.log('dragEnd');
-    //     tab[0].style.backgroundColor = '';
-    // })
+    //     tab.style.backgroundColor = '';
+    // });
     const tabTitle = tab.childNodes[1].childNodes[1];
     const removeTab = tab.childNodes[3]
     removeTab.addEventListener('click', () => {

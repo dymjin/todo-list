@@ -23,7 +23,8 @@ if (!localStorage.getItem('inbox_project')) {
     initInbox();
     todoCreation.setupNewTodo();
 } else {
-    todoCreation.setupExistingTodos(JSON.parse(localStorage.getItem('inbox_project')),
+    const inbox = JSON.parse(localStorage.getItem('inbox_project'));
+    todoCreation.setupExistingTodos(inbox, inbox[0],
         document.querySelector('.inbox'));
 }
 
@@ -55,16 +56,13 @@ function setupExistingProjects(projList) {
         currentProject = project;
         //project tab functionality
         addTabListeners(projectTab);
+        if (project.todoList.length) {
+            todoCreation.setupExistingTodos(projList, project);
+        }
     });
-    todoCreation.setupExistingTodos(projList)
 }
 
 function addTabListeners(tab) {
-    //https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setData
-    //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
-    // tab[0].addEventListener('dragenter', (ev) => {
-    //     console.log('dragEnter');
-    // })
     const todoContainer = tab.childNodes[3];
     const tabContainer = tab;
     const titleWrapper = tab.childNodes[0].childNodes[0];
@@ -127,6 +125,20 @@ function addTabListeners(tab) {
         projectList[currentProject.id - 1].title = tabTitle.value;
         setStorage(projectList, currentProject);
     })
+    //https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setData
+    //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
+    // todoContainer.addEventListener('dragover', (ev) => {
+    //     console.log('dragOver');
+    //     ev.preventDefault();
+    // })
+    // todoContainer.addEventListener('drop', (ev) => {
+    //     console.log('drop')
+    //     ev.preventDefault();
+    //     const data = ev.dataTransfer.getData("text");
+    //     console.log(data)
+    //     const source = document.getElementById(data);
+    //     ev.target.appendChild(source);
+    // })
 }
 
 export { setupNewProject, setupExistingProjects };

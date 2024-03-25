@@ -104,10 +104,12 @@ function addProjectTab(text = 'My project', projectID = 1) {
     return projectTab;
 }
 
-function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-todos'), dueDate = format(new Date(), "dd-MM-yyyy"), priority = '', projectID = 1, todoID = 1) {
+function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-todos'), dueDate = format(new Date(),
+    "dd-MM-yyyy"), priority = '', projectID = 1, todoID = 1, status = false) {
     const todoTab = addTab('todo', text, parent, 'My todo');
     todoTab.setAttribute('data', `${projectID}-${todoID}`)
     const todoStatus = addInput('todo-status', '', todoTab, 'checkbox');
+    todoStatus.checked = status;
     todoTab.insertBefore(todoStatus, todoTab.childNodes[0]);
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab);
     todoTab.draggable = true;
@@ -130,7 +132,7 @@ function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-to
     return todoTab;
 }
 
-function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '') {
+function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '', status = false) {
     clearDOM();
     const todoContainer = addElement('todo-container', '', document.querySelector('.inbox-todo-inputs'));
     const todoTitle = addInput('todo-title', title, todoContainer, '', 'Title');
@@ -142,7 +144,11 @@ function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy
     const todoNotes = addElement('todo-notes', notes, todoContainer, 'textarea');
     todoNotes.placeholder = 'Add note';
     const addCheckboxBtn = addElement('add-checkbox', 'add checkbox', todoContainer, 'button');
-    addElement('checkbox-container', '', todoContainer);
+    const checkboxContainer = addElement('checkbox-container', '', todoContainer);
+    todoContainer.childNodes.forEach(child => {
+        child.disabled = status;
+        checkboxContainer.hidden = status;
+    })
     return todoContainer;
 }
 

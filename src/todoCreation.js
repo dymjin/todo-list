@@ -4,7 +4,7 @@ import * as DOMhandler from './DOMhandler.js';
 let currentTodo, checkboxIndex = 1, todoTab;
 
 function addTodo(title = '', desc = '', dueDate = format(new Date(), "yyyy-MM-dd"),
-    priority = '', notes = '', checkboxArr = [], status = 'pending', id = 1) {
+    priority = '', notes = '', checkboxArr = [], status = false, id = 1) {
     const currProj = JSON.parse(localStorage.getItem('current_project'));
     if (currProj.todoList.length) {
         //find element with highest id, then add 1 for new id
@@ -61,7 +61,7 @@ function setupExistingTodos(parent, project, parentElem) {
         }
         currentTodo = JSON.parse(localStorage.getItem('current_todo'));
         const todoInputs = DOMhandler.addTodoInputs(currentTodo.title, currentTodo.desc, currentTodo.dueDate,
-            currentTodo.priority, currentTodo.notes, currentTodo.checkboxArr);
+            currentTodo.priority, currentTodo.notes, currentTodo.status);
         addInputListeners(todoInputs);
     }
 }
@@ -165,6 +165,15 @@ function addInputListeners(todoContainer) {
 }
 
 function addTodoTabListeners(tab) {
+    const statusCheckbox = tab.childNodes[0];
+    statusCheckbox.addEventListener('input', () => {
+        const projList = JSON.parse(localStorage.getItem('project_list'));
+        const inbox = JSON.parse(localStorage.getItem('inbox_project'));
+        document.querySelector('.todo-container').childNodes.forEach(child => {
+            child.disabled = statusCheckbox.checked;
+            document.querySelector('.checkbox-container').hidden = statusCheckbox.checked;
+        })
+    })
     //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
     tab.addEventListener('dragstart', (ev) => {
         console.log('dragStart')

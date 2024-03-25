@@ -28,9 +28,11 @@ if (!localStorage.getItem('inbox_project')) {
         document.querySelector('.inbox'));
 }
 
-function setStorage(projList, currProj) {
-    localStorage.setItem('project_list', JSON.stringify(projList));
-    localStorage.setItem('current_project', JSON.stringify(currProj));
+function setStorage(projList, currProj, currTodo, inbox) {
+    if (projList) { localStorage.setItem('project_list', JSON.stringify(projList)); }
+    if (currProj) { localStorage.setItem('current_project', JSON.stringify(currProj)); }
+    if (currTodo) { localStorage.setItem('current_todo', JSON.stringify(currTodo)); }
+    if (inbox) { localStorage.setItem('inbox_project', JSON.stringify(inbox)); }
 }
 
 function setupNewProject() {
@@ -62,8 +64,83 @@ function setupExistingProjects(projList) {
     });
 }
 
+function dropHandler(ev, todoContainer) {
+    ev.preventDefault();
+    let srcParent, destParent, transferTodo;
+    let todoContainerIndex = todoContainer.getAttribute('data');
+    let projList = JSON.parse(localStorage.getItem('project_list'));
+    let inbox = JSON.parse(localStorage.getItem('inbox_project'));
+    const data = ev.dataTransfer.getData("text");
+    let transferTodoIndex = data[0];
+    if (todoContainerIndex !== transferTodoIndex) { /* make sure srcParent index isn't the same as destParent index */
+        if (+transferTodoIndex) {
+            transferTodo = projList[transferTodoIndex - 1].todoList[data[2] - 1];
+            srcParent = projList[transferTodoIndex - 1];
+            +todoContainerIndex ? destParent = projList[todoContainerIndex - 1] : destParent = inbox[0];
+        } else {
+            transferTodo = inbox[0].todoList[data[2] - 1];
+            srcParent = inbox[0];
+            destParent = projList[todoContainerIndex - 1];
+        }
+        srcParent.todoList.splice(data[2] - 1, 1);
+        destParent.todoList.push(transferTodo);
+        destParent.todoList.forEach((todo, index) => {
+            todo.id = index + 1;
+        })
+        const source = document.getElementById(`todo-src-${data}`);
+        todoContainer.appendChild(source);
+        if (srcParent.todoList) {
+            srcParent.todoList.forEach((todo, index) => {
+                todo.id = index + 1;
+            })
+            let srcParentDOM;
+            srcParentDOM = document.getElementById(`todo-dest-${data[0]}`)
+            srcParentDOM.childNodes.forEach((elem, index) => {
+                elem.setAttribute('data', `${transferTodoIndex}-${index + 1}`);
+                elem.id = `todo-src-${transferTodoIndex}-${index + 1}`;
+            });
+        }
+        todoContainer.childNodes.forEach((elem, index) => {
+            elem.setAttribute('data', `${todoContainerIndex}-${index + 1}`);
+            elem.id = `todo-src-${todoContainerIndex}-${index + 1}`;
+        });
+        let currProj;
+        if (destParent.id) {
+            projList[todoContainerIndex - 1] = destParent;
+            if (srcParent.id) {
+            } else {
+                inbox[0] = srcParent;
+            }
+            currProj = projList[todoContainerIndex - 1]
+        } else {
+            inbox[0] = destParent;
+            currProj = inbox[0];
+            projList[todoContainerIndex - 1] = srcParent;
+        }
+        setStorage(projList, currProj,
+            projList[todoContainerIndex - 1].todoList.at(-1), inbox);
+    }
+}
+
+const inboxDOM = document.querySelector('.inbox-todos');
+inboxDOM.addEventListener('drop', (ev) => {
+    dropHandler(ev, inboxDOM);
+})
+inboxDOM.addEventListener('dragover', (ev) => {
+    console.log('dragOver');
+    ev.preventDefault();
+})
 function addTabListeners(tab) {
     const todoContainer = tab.childNodes[3];
+    //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
+    todoContainer.addEventListener('dragover', (ev) => {
+        console.log('dragOver');
+        ev.preventDefault();
+    })
+    todoContainer.addEventListener('drop', (ev) => {
+        dropHandler(ev, todoContainer);
+    })
+
     const tabContainer = tab;
     const titleWrapper = tab.childNodes[0].childNodes[0];
     const tabTitle = tab.childNodes[0].childNodes[1];
@@ -79,8 +156,7 @@ function addTabListeners(tab) {
                 project.id = index + 1;
                 currentProject = project;
             })
-            setStorage(projectList, currentProject);
-            localStorage.setItem('current_todo', JSON.stringify(currentProject.todoList.at(-1)));
+            setStorage(projectList, currentProject, currentProject.todoList.at(-1));
             const projectTabsContainer = document.querySelector('.project-tabs-container');
             projectTabsContainer.removeChild(tabContainer);
             projectTabsContainer.childNodes.forEach((elem, index) => {
@@ -112,11 +188,14 @@ function addTabListeners(tab) {
     titleWrapper.addEventListener('click', () => {
         const projectList = JSON.parse(localStorage.getItem('project_list'))
         currentProject = projectList[tabContainer.getAttribute('data') - 1];
-        localStorage.setItem('current_project', JSON.stringify(currentProject));
-        let todo = currentProject.todoList.at(-1);
-        localStorage.setItem('current_todo', JSON.stringify(todo));
-        todoCreation.addInputListeners(DOMhandler.addTodoInputs(todo.title, todo.desc, todo.dueDate,
-            todo.priority, todo.notes, todo.checkboxArr));
+        if (currentProject.todoList.length) {
+            let todo = currentProject.todoList.at(-1);
+            todoCreation.addInputListeners(DOMhandler.addTodoInputs(todo.title, todo.desc, todo.dueDate,
+                todo.priority, todo.notes, todo.checkboxArr));
+        } else {
+            todoCreation.addInputListeners(DOMhandler.addTodoInputs())
+        }
+        setStorage(projectList, currentProject, currentProject.todoList.at(-1))
     })
     tabTitle.addEventListener('input', () => {
         const projectList = JSON.parse(localStorage.getItem('project_list'));
@@ -125,20 +204,6 @@ function addTabListeners(tab) {
         projectList[currentProject.id - 1].title = tabTitle.value;
         setStorage(projectList, currentProject);
     })
-    //https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setData
-    //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
-    // todoContainer.addEventListener('dragover', (ev) => {
-    //     console.log('dragOver');
-    //     ev.preventDefault();
-    // })
-    // todoContainer.addEventListener('drop', (ev) => {
-    //     console.log('drop')
-    //     ev.preventDefault();
-    //     const data = ev.dataTransfer.getData("text");
-    //     console.log(data)
-    //     const source = document.getElementById(data);
-    //     ev.target.appendChild(source);
-    // })
 }
 
 export { setupNewProject, setupExistingProjects };

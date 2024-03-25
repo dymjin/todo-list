@@ -104,20 +104,18 @@ function addProjectTab(text = 'My project', projectID = 1) {
     return projectTab;
 }
 
-function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox'), dueDate = format(new Date(), "dd-MM-yyyy"), priority = '', projectID = 1, todoID = 1) {
-    // const todoTabsContainer = addElement('todo-tabs-container', '', parent);
-    // console.log(parent)
+function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-todos'), dueDate = format(new Date(), "dd-MM-yyyy"), priority = '', projectID = 1, todoID = 1) {
     const todoTab = addTab('todo', text, parent, 'My todo');
     todoTab.setAttribute('data', `${projectID}-${todoID}`)
     const todoStatus = addInput('todo-status', '', todoTab, 'checkbox');
     todoTab.insertBefore(todoStatus, todoTab.childNodes[0]);
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab);
     todoTab.draggable = true;
-    todoTab.id = 'todo-src';
+    todoTab.id = `todo-src-${projectID}-${todoID}`;
     const editTab = todoTab.childNodes[2];
     todoTab.removeChild(editTab);
     const removeTab = todoTab.childNodes[2];
-    todoTab.insertBefore(todoTabDueDate,removeTab)
+    todoTab.insertBefore(todoTabDueDate, removeTab)
     switch (priority.toLowerCase()) {
         case 'low':
             todoTab.style.backgroundColor = '#85ffc8';
@@ -134,7 +132,7 @@ function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox'),
 
 function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '') {
     clearDOM();
-    const todoContainer = addElement('todo-container', '', document.querySelector('.inbox'));
+    const todoContainer = addElement('todo-container', '', document.querySelector('.inbox-todo-inputs'));
     const todoTitle = addInput('todo-title', title, todoContainer, '', 'Title');
     const todoDesc = addInput('todo-desc', desc, todoContainer, '', 'Description');
     const todoDueDate = addInput('todo-due-date', dueDate, todoContainer, 'date');

@@ -23,3 +23,8 @@
     right: 0;
     bottom: 0;
 }
+
+.inbox-todos,
+.project-todos-container {
+    min-height: 50px;
+}

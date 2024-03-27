@@ -132,7 +132,8 @@ function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-to
     return todoTab;
 }
 
-function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '', status = false) {
+function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '',
+    checkboxArr = [], status = false) {
     clearDOM();
     const todoContainer = addElement('todo-container', '', document.querySelector('.inbox-todo-inputs'));
     const todoTitle = addInput('todo-title', title, todoContainer, '', 'Title');
@@ -145,6 +146,9 @@ function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy
     todoNotes.placeholder = 'Add note';
     const addCheckboxBtn = addElement('add-checkbox', 'add checkbox', todoContainer, 'button');
     const checkboxContainer = addElement('checkbox-container', '', todoContainer);
+    checkboxArr.forEach(checkbox => {
+        addCheckbox(checkboxContainer, checkbox);
+    })
     todoContainer.childNodes.forEach(child => {
         child.disabled = status;
         checkboxContainer.hidden = status;

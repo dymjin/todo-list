@@ -4,12 +4,11 @@ import * as projectCreation from './projectCreation.js';
 
 const storedProjectList = JSON.parse(localStorage.getItem('project_list'));
 if (storedProjectList) {
-    projectCreation.setupExistingProjects(storedProjectList);
+    projectCreation.setupExistingProjects();
 }
 
 document.querySelector('.add-project').addEventListener('click', () => {
     projectCreation.setupNewProject();
-    // todoCreation.setupNewTodo();
 });
 document.querySelector('.add-todo').addEventListener('click', () => {
     todoCreation.setupNewTodo();

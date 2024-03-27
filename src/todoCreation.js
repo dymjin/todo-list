@@ -149,13 +149,11 @@ function addTodoTabListeners(tab) {
     })
     //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
     tab.addEventListener('dragstart', (ev) => {
-        console.log('dragStart')
         tab.style.backgroundColor = 'blue';
         ev.dataTransfer.clearData();
         ev.dataTransfer.setData("text/plain", tab.getAttribute('data'));
     });
     tab.addEventListener('dragend', () => {
-        console.log('dragEnd');
         tab.style.backgroundColor = '';
     });
     const tabTitle = tab.childNodes[1].childNodes[1];
@@ -184,6 +182,12 @@ function addTodoTabListeners(tab) {
             const todo = DOMhandler.addTodoInputs(currTodo.title, currTodo.desc, currTodo.dueDate,
                 currTodo.priority, currTodo.notes, currTodo.checkboxArr, currTodo.status);
             if (currProj.todoList.length) {
+                addInputListeners(todo);
+            } else {
+                setStorage(inbox, inbox[0], inbox[0].todoList.at(-1));
+                let currTodo = inbox[0].todoList.at(-1);
+                let todo = DOMhandler.addTodoInputs(currTodo.title, currTodo.desc, currTodo.dueDate,
+                    currTodo.priority, currTodo.notes, currTodo.checkboxArr, currTodo.status);
                 addInputListeners(todo);
             }
             projectTodosContainer.removeChild(tab);

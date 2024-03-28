@@ -89,15 +89,35 @@ function addInputListeners(todoContainer) {
         checkboxLabelHandler(checkboxContainer);
         todoContainer.childNodes[5].addEventListener('click', () => {
             const label = DOMhandler.addCheckbox(checkboxContainer);
+            let id;
+            if (projectTodo.checkboxArr.length) {
+                let sortedArr = projectTodo.checkboxArr.sort((a, b) => a.id - b.id)
+                id = (sortedArr.at(-1).id + 1);
+            } else {
+                id = 1;
+            }
             projectTodo.checkboxArr
-                .push({ title: label.childNodes[1].value, state: label.childNodes[0].checked });
+                .push({ title: label.childNodes[1].value, state: label.childNodes[0].checked, id: id });
+            label.childNodes.forEach(child => {
+                child.setAttribute('data', projectTodo.checkboxArr.at(-1).id);
+            })
+            label.addEventListener('input', () => {
+                checkboxInputHandler(label)
+            })
+            const rmvCheckboxBtn = label.childNodes[2]
+            rmvCheckboxBtn.addEventListener('click', () => {
+                checkboxRemoveHandler(checkboxContainer, label);
+            })
             setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
-            checkboxLabelHandler(checkboxContainer);
         });
     }
 }
 
-function checkboxInputHandler(label, parentProj, projectTodo, currProj) {
+function checkboxInputHandler(label) {
+    const currProj = JSON.parse(localStorage.getItem('current_project'));
+    const parentProj = JSON.parse(localStorage.getItem('parent_project'));
+    let currTodo = JSON.parse(localStorage.getItem('current_todo'));
+    let projectTodo = parentProj.at(currProj.id - 1).todoList[currTodo.id - 1];
     //checkbox input element
     projectTodo.checkboxArr[label.childNodes[0]
         .getAttribute('data') - 1].state = label.childNodes[0].checked;
@@ -107,17 +127,36 @@ function checkboxInputHandler(label, parentProj, projectTodo, currProj) {
     setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
 }
 
-function checkboxLabelHandler(checkboxContainer) {
-    checkboxContainer.childNodes.forEach((label, index) => {
-        label.childNodes.forEach(child => {
+function checkboxRemoveHandler(checkboxContainer, label) {
+    const rmvBtn = label.childNodes[2];
+    const parentProj = JSON.parse(localStorage.getItem('parent_project'));
+    const currProj = JSON.parse(localStorage.getItem('current_project'));
+    const currTodo = JSON.parse(localStorage.getItem('current_todo'));
+    const projectTodo = parentProj.at(currProj.id - 1).todoList.at(currTodo.id - 1);
+    projectTodo.checkboxArr.splice(rmvBtn.getAttribute('data') - 1, 1);
+    label.parentNode.removeChild(label);
+    projectTodo.checkboxArr.forEach((checkbox, index) => {
+        checkbox.id = index + 1;
+    })
+    checkboxContainer.childNodes.forEach((container, index) => {
+        container.childNodes.forEach(child => {
             child.setAttribute('data', index + 1);
+        })
+    })
+    setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
+}
+
+function checkboxLabelHandler(checkboxContainer) {
+    checkboxContainer.childNodes.forEach((container, index) => {
+        container.childNodes.forEach((child) => {
+            child.setAttribute('data', index + 1)
             child.addEventListener('input', () => {
-                const currProj = JSON.parse(localStorage.getItem('current_project'));
-                const parentProj = JSON.parse(localStorage.getItem('parent_project'));
-                const currTodo = JSON.parse(localStorage.getItem('current_todo'));
-                let projectTodo = parentProj.at(currProj.id - 1).todoList[currTodo.id - 1];
-                checkboxInputHandler(label, parentProj, projectTodo, currProj);
+                checkboxInputHandler(container);
             })
+        })
+        const rmvCheckboxBtn = container.childNodes[2]
+        rmvCheckboxBtn.addEventListener('click', () => {
+            checkboxRemoveHandler(checkboxContainer, container);
         })
     })
 }

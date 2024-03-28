@@ -77,6 +77,7 @@ function addCheckbox(parent, checkbox) {
     const label = addElement('checkbox-item-container', '', parent, 'label');
     const checkboxTick = addInput('checkbox-tick', '', label, 'checkbox');
     const checkboxTitle = addInput('checkbox-title', '', label, '', 'Item name');
+    const checkboxRemoveBtn = addElement('checkbox-remove-btn', 'X', label, 'button');
     if (checkbox) {
         checkboxTick.checked = checkbox.state;
         checkboxTitle.value = checkbox.title;
@@ -91,7 +92,7 @@ function addTab(name, text, parent, placeholder) {
     const tabTitle = addInput(`${name}-tab-title`, text, tabTitleContainer, '', placeholder);
     tabTitle.disabled = true;
     const editTab = addElement(`${name}-tab-edit`, 'edit', tabContainer, 'button')
-    const removeTab = addElement(`${name}-tab-remove`, 'remove', tabContainer, 'button');
+    const removeTab = addElement(`${name}-tab-remove`, 'X', tabContainer, 'button');
     return tabContainer;
 }
 

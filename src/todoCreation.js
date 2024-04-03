@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import * as DOMhandler from './DOMhandler.js';
+import styles from './style.css';
 
 function addTodo(title = '', desc = '', dueDate = format(new Date(), "yyyy-MM-dd"),
     priority = '', notes = '', checkboxArr = [], status = false, id = 1) {
@@ -32,7 +33,7 @@ function setupNewTodo() {
     parentProj.at(currProj.id - 1).todoList.push(currTodo);
     currProj.todoList.push(currTodo);
     const parentElem = document.getElementById(`todo-dest-${currProj.id}`)
-    const todoTab = DOMhandler.addTodoTab('', parentElem, undefined, undefined, currProj.id, currTodo.id);
+    const todoTab = DOMhandler.addTodoTab('My todo', parentElem, undefined, undefined, currProj.id, currTodo.id);
     addTodoTabListeners(todoTab);
     setStorage(parentProj, currProj, currTodo);
     const todoInputs = DOMhandler.addTodoInputs();
@@ -43,7 +44,12 @@ function setupExistingTodos(project) {
     if (project.todoList.length) {
         const parentElem = document.getElementById(`todo-dest-${project.id}`)
         project.todoList.forEach(todo => {
-            const todoTab = DOMhandler.addTodoTab(todo.title, parentElem, format(new Date(todo.dueDate), 'dd-MM-yyyy'),
+            let text;
+            text = todo.title;
+            if (!todo.title) {
+                text = 'My todo';
+            }
+            const todoTab = DOMhandler.addTodoTab(text, parentElem, format(new Date(todo.dueDate), 'dd-MM'),
                 todo.priority, project.id, todo.id, todo.status);
             addTodoTabListeners(todoTab);
         })
@@ -70,11 +76,12 @@ function addInputListeners(todoContainer) {
                 let todoTab = document.querySelector(`.todo-tab[data="${currProj.id}-${currTodo.id}"]`);
                 //potential optimization
                 if (todoContainer.childNodes[0].value) {
-                    todoTab.childNodes[1].childNodes[1].value = todoContainer.childNodes[0].value;
+                    todoTab.childNodes[0].childNodes[1].textContent = todoContainer.childNodes[0].value;
                 }
                 if (todoContainer.childNodes[2].value) {
-                    todoTab.childNodes[2].textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM-yyyy");
+                    todoTab.childNodes[2].textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM");
                 }
+               
                 //add input event listener for all todoDOM elements
                 projectTodo.title = todoContainer.childNodes[0].value;
                 projectTodo.desc = todoContainer.childNodes[1].value;
@@ -84,7 +91,17 @@ function addInputListeners(todoContainer) {
                 setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
             })
         }
-
+        const statusCheckbox = todoContainer.childNodes[7];
+        statusCheckbox.addEventListener('input', () => {
+            document.querySelector('.todo-container').childNodes.forEach(child => {
+                child.disabled = statusCheckbox.checked;
+                document.querySelector('.checkbox-container').hidden = statusCheckbox.checked;
+                statusCheckbox.disabled = false;
+            })
+            projectTodo.status = statusCheckbox.checked;
+            setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
+        })
+        
         const checkboxContainer = document.querySelector('.checkbox-container');
         checkboxLabelHandler(checkboxContainer);
         todoContainer.childNodes[5].addEventListener('click', () => {
@@ -162,30 +179,6 @@ function checkboxLabelHandler(checkboxContainer) {
 }
 
 function addTodoTabListeners(tab) {
-    const statusCheckbox = tab.childNodes[0];
-    statusCheckbox.addEventListener('input', () => {
-        let currProj = JSON.parse(localStorage.getItem('current_project'));
-        const projList = JSON.parse(localStorage.getItem('project_list'));
-        const inbox = JSON.parse(localStorage.getItem('inbox_project'));
-        let parentProj = JSON.parse(localStorage.getItem('parent_project'));
-        let currTodo = JSON.parse(localStorage.getItem('current_todo'));
-        if (+tab.getAttribute('data')[0]) {
-            parentProj = projList;
-        } else {
-            parentProj = inbox;
-        }
-        currProj = parentProj.at(tab.getAttribute('data')[0] - 1);
-        currTodo = currProj.todoList.at(tab.getAttribute('data')[2] - 1);
-        let projectTodo = parentProj.at(currProj.id - 1).todoList[currTodo.id - 1];
-        projectTodo.status = statusCheckbox.checked;
-        document.querySelector('.todo-container').childNodes.forEach(child => {
-            child.disabled = statusCheckbox.checked;
-            document.querySelector('.checkbox-container').hidden = statusCheckbox.checked;
-        })
-        setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
-        addInputListeners(DOMhandler.addTodoInputs(projectTodo.title, projectTodo.desc,
-            projectTodo.dueDate, projectTodo.priority, projectTodo.notes, projectTodo.checkboxArr, projectTodo.status))
-    })
     //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
     tab.addEventListener('dragstart', (ev) => {
         tab.style.backgroundColor = 'blue';
@@ -195,8 +188,8 @@ function addTodoTabListeners(tab) {
     tab.addEventListener('dragend', () => {
         tab.style.backgroundColor = '';
     });
-    const tabTitle = tab.childNodes[1].childNodes[1];
-    const removeTab = tab.childNodes[3]
+    const tabTitle = tab.childNodes[0].childNodes[1];
+    const removeTab = tab.childNodes[1];
     removeTab.addEventListener('click', () => {
         let currProj = JSON.parse(localStorage.getItem('current_project'));
         const projList = JSON.parse(localStorage.getItem('project_list'));
@@ -244,7 +237,13 @@ function addTodoTabListeners(tab) {
             setStorage(parentProj, currProj, currTodo);
         }
     })
-    const wrapper = tab.childNodes[1].childNodes[0];
+    const wrapper = tab.childNodes[0].childNodes[0];
+    wrapper.addEventListener('mouseover', () => {
+        tabTitle.style.color = "white";
+    })
+    wrapper.addEventListener('mouseout', () => {
+        tabTitle.style.color = "rgb(221, 221, 221)";
+    })
     wrapper.addEventListener('click', () => {
         let currProj = JSON.parse(localStorage.getItem('current_project'));
         const projList = JSON.parse(localStorage.getItem('project_list'));

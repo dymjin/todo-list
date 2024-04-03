@@ -85,20 +85,25 @@ function addCheckbox(parent, checkbox) {
     return label;
 }
 
-function addTab(name, text, parent, placeholder) {
+function addTab(name, text = "My todo", parent) {
     const tabContainer = addElement(`${name}-tab`, '', parent);
     const tabTitleContainer = addElement(`${name}-tab-title-container`, '', tabContainer);
     const tabTitleWrapper = addElement(`${name}-tab-title-wrapper`, '', tabTitleContainer);
-    const tabTitle = addInput(`${name}-tab-title`, text, tabTitleContainer, '', placeholder);
-    tabTitle.disabled = true;
-    const editTab = addElement(`${name}-tab-edit`, 'edit', tabContainer, 'button')
-    const removeTab = addElement(`${name}-tab-remove`, 'X', tabContainer, 'button');
+    const tabTitle = addElement(`${name}-tab-title`, text, tabTitleContainer);
+    const editTab = addElement(`${name}-tab-edit`, '', tabContainer, 'i');
+    editTab.classList.add('fa-solid');
+    editTab.classList.add('fa-pencil');
+    const removeTab = addElement(`${name}-tab-remove`, '', tabContainer, 'i');
+    removeTab.classList.add('fa-solid');
+    removeTab.classList.add('fa-trash');
     return tabContainer;
 }
 
 function addProjectTab(text = 'My project', projectID = 1) {
-    const projectTab = addTab('project', text, document.querySelector('.project-tabs-container'), 'My project');
+    const projectTab = addTab('project', text, document.querySelector('.project-tabs-container'));
     projectTab.setAttribute('data', projectID);
+    projectTab.classList.add('tab');
+    projectTab.childNodes[0].childNodes[1].classList.add('project');
     const projectTodosContainer = addElement('project-todos-container', '', projectTab);
     projectTodosContainer.setAttribute('data', projectID);
     projectTodosContainer.id = `todo-dest-${projectID}`;
@@ -106,19 +111,14 @@ function addProjectTab(text = 'My project', projectID = 1) {
 }
 
 function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-todos'), dueDate = format(new Date(),
-    "dd-MM-yyyy"), priority = '', projectID = 1, todoID = 1, status = false) {
-    const todoTab = addTab('todo', text, parent, 'My todo');
+    "dd-MM"), priority = '', projectID = 1, todoID = 1) {
+    const todoTab = addTab('todo', text, parent);
     todoTab.setAttribute('data', `${projectID}-${todoID}`)
-    const todoStatus = addInput('todo-status', '', todoTab, 'checkbox');
-    todoStatus.checked = status;
-    todoTab.insertBefore(todoStatus, todoTab.childNodes[0]);
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab);
     todoTab.draggable = true;
     todoTab.id = `todo-src-${projectID}-${todoID}`;
-    const editTab = todoTab.childNodes[2];
+    const editTab = todoTab.childNodes[1];
     todoTab.removeChild(editTab);
-    const removeTab = todoTab.childNodes[2];
-    todoTab.insertBefore(todoTabDueDate, removeTab)
     switch (priority.toLowerCase()) {
         case 'low':
             todoTab.style.backgroundColor = '#85ffc8';
@@ -136,8 +136,9 @@ function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-to
 function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy-MM-dd'), priority = '', notes = '',
     checkboxArr = [], status = false) {
     clearDOM();
-    const todoContainer = addElement('todo-container', '', document.querySelector('.inbox-todo-inputs'));
+    const todoContainer = addElement('todo-container', '', document.querySelector('.page-container'));
     const todoTitle = addInput('todo-title', title, todoContainer, '', 'Title');
+    todoTitle.setAttribute('maxlength', 20);
     const todoDesc = addInput('todo-desc', desc, todoContainer, '', 'Description');
     const todoDueDate = addInput('todo-due-date', dueDate, todoContainer, 'date');
     todoDueDate.min = '2024-01-01';
@@ -147,14 +148,17 @@ function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy
     todoNotes.placeholder = 'Add note';
     const addCheckboxBtn = addElement('add-checkbox', 'add checkbox', todoContainer, 'button');
     const checkboxContainer = addElement('checkbox-container', '', todoContainer);
+    const todoStatus = addInput('todo-status', '', todoContainer, 'checkbox');
+    todoStatus.checked = status;
     checkboxArr.forEach(checkbox => {
         addCheckbox(checkboxContainer, checkbox);
     })
     todoContainer.childNodes.forEach(child => {
         child.disabled = status;
         checkboxContainer.hidden = status;
+        todoStatus.disabled = false;
     })
     return todoContainer;
 }
 
-export { addTodoInputs, addCheckbox, addTodoTab, addProjectTab, clearTabDOM };
+export { addTodoInputs, addCheckbox, addTodoTab, addProjectTab, clearTabDOM, addElement };

@@ -5,22 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To do: Add title</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rethink+Sans&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/32e898c3f5.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <div class="buttons">
-        <button class="add-project">Add project</button>
-        <button class="add-todo">Add todo</button>
-    </div>
     <div class="page-container">
-        <div class="inbox">
-            <div class="inbox-tab">Inbox</div>
-            <div class="inbox-todos" data="0" id="todo-dest-0"></div>
-            <div class="inbox-todo-inputs"></div>
+        <div class="tab-wrapper"></div>
+        <div class="buttons">
+            <button class="add-project">Add project</button>
+            <button class="add-todo">Add todo</button>
         </div>
+        <div class="tab inbox">
+            <div class="project inbox-tab">Inbox</div>
+            <div class="inbox-todos" data="0" id="todo-dest-0"></div>
+        </div>
+        <!-- <hr id="test"> -->
         <div class="project-tabs-container"></div>
     </div>
-
 </body>
 
 </html>

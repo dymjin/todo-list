@@ -44,7 +44,7 @@ function setupNewProject() {
     projList ? 0 : projList = [];
     projList.push(currProj);
     setStorage(projList, currProj);
-    const projectTab = DOMhandler.addProjectTab('', currProj.id);
+    const projectTab = DOMhandler.addProjectTab('My project', currProj.id);
     addTabListeners(projectTab);
     todoCreation.setupNewTodo();
 }
@@ -52,7 +52,12 @@ function setupNewProject() {
 function setupExistingProjects() {
     const projList = JSON.parse(localStorage.getItem('project_list'));
     projList.forEach(project => {
-        const projectTab = DOMhandler.addProjectTab(project.title, project.id);
+        let text;
+        text = project.title;
+        if (!project.title) {
+            text = 'My project';
+        }
+        const projectTab = DOMhandler.addProjectTab(text, project.id);
         //project tab functionality
         addTabListeners(projectTab);
         if (project.todoList.length) {
@@ -169,20 +174,49 @@ function addTabListeners(tab) {
         });
     })
     editTab.addEventListener('click', () => {
-        tabTitle.disabled = false;
-        tabTitle.focus();
+        tabClickHandler(tabContainer);
+        const currProj = JSON.parse(localStorage.getItem('current_project'));
+        const tabTitle = document.querySelector(`.project-tab[data="${currProj.id}"]`).childNodes[0].childNodes[1];
+        const tabTitleInput = DOMhandler.addElement(tabTitle.getAttribute('class'), '', tabTitle.parentNode, 'input');
+        tabTitleInput.value = tabTitle.textContent;
+        tabTitleInput.placeholder = 'Project title';
+        tabTitleInput.setAttribute('maxlength', 15)
+        tabTitle.replaceWith(tabTitleInput);
+        tabTitleInput.addEventListener('input', () => {
+            projectInputHandler(document.querySelector(`.project-tab[data="${currProj.id}"]`), tabTitleInput);
+        })
+        tabTitleInput.id = 'project-tab-edit';
+        tabTitleInput.focus();
+        tabTitleInput.addEventListener('blur', () => {
+            let text;
+            text = tabTitleInput.value;
+            if (!tabTitleInput.value) {
+                text = 'My Project';
+            }
+            const tabTitle = DOMhandler.addElement(tabTitleInput.getAttribute('class'), text,
+                tabTitleInput.parentNode, 'div');
+            tabTitleInput.replaceWith(tabTitle);
+        })
     })
-    tabTitle.onblur = () => { tabTitle.disabled = true; };
     titleWrapper.addEventListener('click', () => {
         tabClickHandler(tabContainer);
     })
-    tabTitle.addEventListener('input', () => {
-        const projList = JSON.parse(localStorage.getItem('project_list'));
-        let currProj = projList[tabContainer.getAttribute('data') - 1];
-        currProj.title = tabTitle.value;
-        projList[currProj.id - 1].title = tabTitle.value;
-        setStorage(projList, currProj);
+    titleWrapper.addEventListener('mouseover', () => {
+        document.querySelector(`.project-tab[data="${tab.getAttribute('data')}"]`).childNodes[0].childNodes[1].style.color = "white";
     })
+    titleWrapper.addEventListener('mouseout', () => {
+        document.querySelector(`.project-tab[data="${tab.getAttribute('data')}"]`).childNodes[0].childNodes[1].style.color = "rgb(221, 221, 221)";
+    })
+}
+
+function projectInputHandler(tabContainer, tab) {
+    const projList = JSON.parse(localStorage.getItem('project_list'));
+    let currProj = projList[tabContainer.getAttribute('data') - 1];
+    if (tab.value) {
+        currProj.title = tab.value;
+        projList[currProj.id - 1].title = tab.value;
+        setStorage(projList, currProj);
+    }
 }
 
 const inboxTab = document.querySelector('.inbox-tab');

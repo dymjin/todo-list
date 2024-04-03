@@ -74,6 +74,7 @@ function addInputListeners(todoContainer) {
                 let projectTodo = parentProj.at(currProj.id - 1).todoList[currTodo.id - 1];
                 // change todo tab DOM
                 let todoTab = document.querySelector(`.todo-tab[data="${currProj.id}-${currTodo.id}"]`);
+                todoTab.scrollIntoView();
                 //potential optimization
                 if (todoContainer.childNodes[0].value) {
                     todoTab.childNodes[0].childNodes[1].textContent = todoContainer.childNodes[0].value;

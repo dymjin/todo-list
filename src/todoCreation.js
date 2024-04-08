@@ -74,7 +74,7 @@ function addInputListeners(todoContainer) {
                 let projectTodo = parentProj.at(currProj.id - 1).todoList[currTodo.id - 1];
                 // change todo tab DOM
                 let todoTab = document.querySelector(`.todo-tab[data="${currProj.id}-${currTodo.id}"]`);
-                todoTab.scrollIntoView();
+                todoTab.scrollIntoView({ block: "center" });
                 //potential optimization
                 if (todoContainer.childNodes[0].value) {
                     todoTab.childNodes[0].childNodes[1].textContent = todoContainer.childNodes[0].value;
@@ -82,7 +82,7 @@ function addInputListeners(todoContainer) {
                 if (todoContainer.childNodes[2].value) {
                     todoTab.childNodes[2].textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM");
                 }
-               
+
                 //add input event listener for all todoDOM elements
                 projectTodo.title = todoContainer.childNodes[0].value;
                 projectTodo.desc = todoContainer.childNodes[1].value;
@@ -92,8 +92,9 @@ function addInputListeners(todoContainer) {
                 setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
             })
         }
-        const statusCheckbox = todoContainer.childNodes[7];
-        statusCheckbox.addEventListener('input', () => {
+        const statusCheckboxLabel = todoContainer.childNodes[7];
+        statusCheckboxLabel.addEventListener('input', () => {
+            const statusCheckbox =  statusCheckboxLabel.childNodes[1];
             document.querySelector('.todo-container').childNodes.forEach(child => {
                 child.disabled = statusCheckbox.checked;
                 document.querySelector('.checkbox-container').hidden = statusCheckbox.checked;
@@ -102,9 +103,9 @@ function addInputListeners(todoContainer) {
             projectTodo.status = statusCheckbox.checked;
             setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
         })
-        
+
         const checkboxContainer = document.querySelector('.checkbox-container');
-        checkboxLabelHandler(checkboxContainer);
+        checkboxLabelHandler(checkboxContainer, projectTodo.checkboxArr);
         todoContainer.childNodes[5].addEventListener('click', () => {
             const label = DOMhandler.addCheckbox(checkboxContainer);
             let id;
@@ -152,7 +153,8 @@ function checkboxRemoveHandler(checkboxContainer, label) {
     const currTodo = JSON.parse(localStorage.getItem('current_todo'));
     const projectTodo = parentProj.at(currProj.id - 1).todoList.at(currTodo.id - 1);
     projectTodo.checkboxArr.splice(rmvBtn.getAttribute('data') - 1, 1);
-    label.parentNode.removeChild(label);
+    label = document.querySelector(`.checkbox-title[data="${rmvBtn.getAttribute('data')}"]`);
+    label.parentNode.parentNode.removeChild(label.parentNode);
     projectTodo.checkboxArr.forEach((checkbox, index) => {
         checkbox.id = index + 1;
     })
@@ -164,19 +166,35 @@ function checkboxRemoveHandler(checkboxContainer, label) {
     setStorage(parentProj, parentProj.at(currProj.id - 1), projectTodo);
 }
 
-function checkboxLabelHandler(checkboxContainer) {
-    checkboxContainer.childNodes.forEach((container, index) => {
-        container.childNodes.forEach((child) => {
+function checkboxLabelHandler(checkboxContainer, checkboxArr) {
+    // if (checkboxContainer.firstChild) {
+    while (checkboxContainer.firstChild) {
+        checkboxContainer.removeChild(checkboxContainer.firstChild);
+    }
+    // }
+
+    checkboxArr.forEach((checkbox, index) => {
+        const label = DOMhandler.addCheckbox(checkboxContainer, checkbox);
+        label.childNodes.forEach(child => {
             child.setAttribute('data', index + 1)
             child.addEventListener('input', () => {
-                checkboxInputHandler(container);
+                checkboxInputHandler(label);
             })
         })
-        const rmvCheckboxBtn = container.childNodes[2]
+        const rmvCheckboxBtn = label.childNodes[2]
         rmvCheckboxBtn.addEventListener('click', () => {
-            checkboxRemoveHandler(checkboxContainer, container);
+            checkboxRemoveHandler(checkboxContainer, label);
         })
     })
+    // checkboxContainer.childNodes.forEach((container, index) => {
+    //     container.childNodes.forEach((child) => {
+    //         child.setAttribute('data', index + 1)
+    //         child.addEventListener('input', () => {
+    //             checkboxInputHandler(container);
+    //         })
+    //     })
+    //    
+    // })
 }
 
 function addTodoTabListeners(tab) {
@@ -263,7 +281,7 @@ function addTodoTabListeners(tab) {
             currTodo.notes, currTodo.checkboxArr, currTodo.status);
         addInputListeners(todo);
         const checkboxContainer = document.querySelector('.checkbox-container');
-        checkboxLabelHandler(checkboxContainer);
+        checkboxLabelHandler(checkboxContainer, currTodo.checkboxArr);
     })
 }
 

@@ -57,7 +57,7 @@ function addSelect(name = '', parent, defaultOptionText) {
 }
 
 function addPrioritySelect(parent, priority = '') {
-    const select = addSelect('todo-select', parent, 'Set priority');
+    const select = addSelect('todo-select', parent, 'Priority');
     addElement('option', 'Low', select, 'option');
     addElement('option', 'Medium', select, 'option');
     addElement('option', 'High', select, 'option');
@@ -76,8 +76,10 @@ function addPrioritySelect(parent, priority = '') {
 function addCheckbox(parent, checkbox) {
     const label = addElement('checkbox-item-container', '', parent, 'label');
     const checkboxTick = addInput('checkbox-tick', '', label, 'checkbox');
-    const checkboxTitle = addInput('checkbox-title', '', label, '', 'Item name');
-    const checkboxRemoveBtn = addElement('checkbox-remove-btn', 'X', label, 'button');
+    const checkboxTitle = addInput('checkbox-title', '', label, '');
+    const checkboxRemoveBtn = addElement('checkbox-remove-btn', '', label, 'i');
+    checkboxRemoveBtn.classList.add('fa-solid');
+    checkboxRemoveBtn.classList.add('fa-eraser');
     if (checkbox) {
         checkboxTick.checked = checkbox.state;
         checkboxTitle.value = checkbox.title;
@@ -95,7 +97,7 @@ function addTab(name, text = "My todo", parent) {
     editTab.classList.add('fa-pencil');
     const removeTab = addElement(`${name}-tab-remove`, '', tabContainer, 'i');
     removeTab.classList.add('fa-solid');
-    removeTab.classList.add('fa-trash');
+    removeTab.classList.add('fa-eraser');
     return tabContainer;
 }
 
@@ -139,16 +141,19 @@ function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy
     const todoContainer = addElement('todo-container', '', document.querySelector('.page-container'));
     const todoTitle = addInput('todo-title', title, todoContainer, '', 'Title');
     todoTitle.setAttribute('maxlength', 20);
-    const todoDesc = addInput('todo-desc', desc, todoContainer, '', 'Description');
+    const todoDesc = addElement('todo-desc', desc, todoContainer, 'textarea');
+    todoDesc.placeholder = 'Description';
     const todoDueDate = addInput('todo-due-date', dueDate, todoContainer, 'date');
     todoDueDate.min = '2024-01-01';
     todoDueDate.max = '2024-12-31';
     const todoSelect = addPrioritySelect(todoContainer, priority);
     const todoNotes = addElement('todo-notes', notes, todoContainer, 'textarea');
     todoNotes.placeholder = 'Add note';
-    const addCheckboxBtn = addElement('add-checkbox', 'add checkbox', todoContainer, 'button');
+    const addCheckboxBtn = addElement('add-checkbox fa-list-check fa-solid', '', todoContainer, 'i');
     const checkboxContainer = addElement('checkbox-container', '', todoContainer);
-    const todoStatus = addInput('todo-status', '', todoContainer, 'checkbox');
+    const todoStatusLabel = addElement('todo-status-label', 'Mark as complete:', todoContainer, 'label');
+    const todoStatus = addInput('todo-status', '', todoStatusLabel, 'checkbox');
+
     todoStatus.checked = status;
     checkboxArr.forEach(checkbox => {
         addCheckbox(checkboxContainer, checkbox);

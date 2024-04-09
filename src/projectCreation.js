@@ -100,6 +100,9 @@ function dropHandler(ev, todoContainer) {
             todo.id = index + 1;
         })
         const source = document.getElementById(`todo-src-${data}`);
+        const todo = DOMhandler.addTodoInputs(transferTodo.title, transferTodo.desc, transferTodo.dueDate, transferTodo.priority,
+            transferTodo.notes, transferTodo.checkboxArr, transferTodo.status);
+        todoCreation.addInputListeners(todo);
         todoContainer.appendChild(source);
 
         todoContainer.childNodes.forEach((elem, index) => {
@@ -125,19 +128,41 @@ function dropHandler(ev, todoContainer) {
 }
 
 const inboxDOM = document.querySelector('.inbox-todos');
-inboxDOM.addEventListener('drop', (ev) => {
+let inboxParent = inboxDOM.parentNode;
+inboxParent.addEventListener('drop', (ev) => {
+    inboxDOM.style.height = 'unset';
     dropHandler(ev, inboxDOM);
 })
-inboxDOM.addEventListener('dragover', (ev) => {
+inboxParent.addEventListener('dragover', (ev) => {
     ev.preventDefault();
+    if (inboxDOM.firstChild) {
+        inboxDOM.style.height = 'unset';
+    } else {
+        inboxDOM.style.height = '50px';
+    }
 })
+inboxParent.addEventListener('dragleave', (ev) => {
+    ev.preventDefault();
+    inboxDOM.style.height = 'unset';
+})
+
 function addTabListeners(tab) {
     const todoContainer = tab.childNodes[3];
     //https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API#interfaces
-    todoContainer.addEventListener('dragover', (ev) => {
+    tab.addEventListener('dragover', (ev) => {
         ev.preventDefault();
+        if (todoContainer.firstChild) {
+            todoContainer.style.height = 'unset';
+        } else {
+            todoContainer.style.height = '50px';
+        }
     })
-    todoContainer.addEventListener('drop', (ev) => {
+    tab.addEventListener('dragleave', (ev) => {
+        ev.preventDefault();
+        todoContainer.style.height = 'unset';
+    })
+    tab.addEventListener('drop', (ev) => {
+        todoContainer.style.height = 'unset';
         dropHandler(ev, todoContainer);
     })
 

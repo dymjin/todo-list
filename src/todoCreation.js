@@ -74,13 +74,25 @@ function addInputListeners(todoContainer) {
                 let projectTodo = parentProj.at(currProj.id - 1).todoList[currTodo.id - 1];
                 // change todo tab DOM
                 let todoTab = document.querySelector(`.todo-tab[data="${currProj.id}-${currTodo.id}"]`);
-                todoTab.scrollIntoView({ block: "center" });
+                todoTab.scrollIntoView();
                 //potential optimization
                 if (todoContainer.childNodes[0].value) {
                     todoTab.childNodes[0].childNodes[1].textContent = todoContainer.childNodes[0].value;
                 }
                 if (todoContainer.childNodes[2].value) {
                     todoTab.childNodes[2].textContent = format(new Date(todoContainer.childNodes[2].value), "dd-MM");
+                }
+
+                switch (todoContainer.childNodes[3].value.toLowerCase()) {
+                    case 'low':
+                        todoTab.style.setProperty('--priority-color', '#85ffc8');
+                        break;
+                    case 'medium':
+                        todoTab.style.setProperty('--priority-color', '#fcbf5d');
+                        break;
+                    case 'high':
+                        todoTab.style.setProperty('--priority-color', '#fc5151');
+                        break;
                 }
 
                 //add input event listener for all todoDOM elements
@@ -94,7 +106,20 @@ function addInputListeners(todoContainer) {
         }
         const statusCheckboxLabel = todoContainer.childNodes[7];
         statusCheckboxLabel.addEventListener('input', () => {
-            const statusCheckbox =  statusCheckboxLabel.childNodes[1];
+            const currProj = JSON.parse(localStorage.getItem('current_project'));
+            const parentProj = JSON.parse(localStorage.getItem('parent_project'));
+            let currTodo = JSON.parse(localStorage.getItem('current_todo'));
+            let projectTodo = parentProj.at(currProj.id - 1).todoList[currTodo.id - 1];
+            let todoTab = document.querySelector(`.todo-tab[data="${currProj.id}-${currTodo.id}"]`);
+            let todoTitle = todoTab.childNodes[0];
+            const statusCheckbox = statusCheckboxLabel.childNodes[1];
+            if (statusCheckbox.checked) {
+                todoTitle.style.textDecoration = 'line-through';
+                todoTab.style.color = 'white';
+            } else {
+                todoTitle.style.textDecoration = 'none';
+                todoTab.style.color = 'none';
+            }
             document.querySelector('.todo-container').childNodes.forEach(child => {
                 child.disabled = statusCheckbox.checked;
                 document.querySelector('.checkbox-container').hidden = statusCheckbox.checked;

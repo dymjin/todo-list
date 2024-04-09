@@ -113,7 +113,7 @@ function addProjectTab(text = 'My project', projectID = 1) {
 }
 
 function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-todos'), dueDate = format(new Date(),
-    "dd-MM"), priority = '', projectID = 1, todoID = 1) {
+    "dd-MM"), priority = '', projectID = 1, todoID = 1, status) {
     const todoTab = addTab('todo', text, parent);
     todoTab.setAttribute('data', `${projectID}-${todoID}`)
     const todoTabDueDate = addElement('todo-tab-duedate', dueDate, todoTab);
@@ -121,15 +121,22 @@ function addTodoTab(text = 'My todo', parent = document.querySelector('.inbox-to
     todoTab.id = `todo-src-${projectID}-${todoID}`;
     const editTab = todoTab.childNodes[1];
     todoTab.removeChild(editTab);
+        
+    if (status) {
+        todoTab.childNodes[0].style.textDecoration = 'line-through';
+    } else {
+        todoTab.childNodes[0].style.textDecoration = 'none';
+    }
+
     switch (priority.toLowerCase()) {
         case 'low':
-            todoTab.style.backgroundColor = '#85ffc8';
+            todoTab.style.setProperty('--priority-color', '#85ffc8');
             break;
         case 'medium':
-            todoTab.style.backgroundColor = '#fcbf5d';
+            todoTab.style.setProperty('--priority-color', '#fcbf5d');
             break;
         case 'high':
-            todoTab.style.backgroundColor = '#fc5151';
+            todoTab.style.setProperty('--priority-color', '#fc5151');
             break;
     }
     return todoTab;
@@ -153,8 +160,8 @@ function addTodoInputs(title = '', desc = '', dueDate = format(new Date(), 'yyyy
     const checkboxContainer = addElement('checkbox-container', '', todoContainer);
     const todoStatusLabel = addElement('todo-status-label', 'Mark as complete:', todoContainer, 'label');
     const todoStatus = addInput('todo-status', '', todoStatusLabel, 'checkbox');
-
     todoStatus.checked = status;
+
     checkboxArr.forEach(checkbox => {
         addCheckbox(checkboxContainer, checkbox);
     })
